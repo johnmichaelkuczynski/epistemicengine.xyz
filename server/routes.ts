@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { createServer } from "http";
-import { analyzeRequestSchema } from "@shared/schema";
+import { analyzeRequestSchema, updateDoctrineRequestSchema } from "@shared/schema";
 import {
   countWords,
   detectArgument,
@@ -180,6 +180,69 @@ export function registerRoutes(app: Express) {
       return res.status(500).json({
         success: false,
         error: "Failed to delete analysis",
+      });
+    }
+  });
+
+  // Doctrine endpoints
+  app.get("/api/doctrines", async (req: Request, res: Response) => {
+    try {
+      const doctrines = await storage.getAllDoctrines();
+      
+      return res.json({
+        success: true,
+        doctrines,
+      });
+    } catch (error) {
+      console.error("Failed to fetch doctrines:", error);
+      return res.status(500).json({
+        success: false,
+        error: "Failed to fetch doctrines",
+      });
+    }
+  });
+
+  app.put("/api/doctrines/:key", async (req: Request, res: Response) => {
+    try {
+      const validationResult = updateDoctrineRequestSchema.safeParse({
+        key: req.params.key,
+        ...req.body,
+      });
+      
+      if (!validationResult.success) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid request format",
+        });
+      }
+
+      const { key, value, description } = validationResult.data;
+      await storage.setDoctrine(key, value, description);
+      
+      return res.json({
+        success: true,
+      });
+    } catch (error) {
+      console.error("Failed to update doctrine:", error);
+      return res.status(500).json({
+        success: false,
+        error: "Failed to update doctrine",
+      });
+    }
+  });
+
+  app.post("/api/doctrines/initialize", async (req: Request, res: Response) => {
+    try {
+      await storage.initializeDefaultDoctrines();
+      
+      return res.json({
+        success: true,
+      });
+    } catch (error) {
+      console.error("Failed to initialize doctrines:", error);
+      return res.status(500).json({
+        success: false,
+        error: "Failed to initialize doctrines",
       });
     }
   });

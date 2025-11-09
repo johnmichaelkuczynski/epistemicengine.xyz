@@ -3,8 +3,13 @@ import {
   type InsertUser,
   type AnalysisHistoryRecord,
   type InsertAnalysisHistory,
+  type DoctrineEntry,
+  type DoctrineStore,
+  type DoctrineRecord,
+  type InsertDoctrine,
   analysisHistory,
-  users
+  users,
+  doctrines
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { drizzle } from "drizzle-orm/neon-serverless";
@@ -26,6 +31,12 @@ export interface IStorage {
   getAnalysisHistory(userId?: string, limit?: number): Promise<AnalysisHistoryRecord[]>;
   getAnalysisById(id: string): Promise<AnalysisHistoryRecord | undefined>;
   deleteAnalysis(id: string): Promise<void>;
+  
+  getAllDoctrines(): Promise<DoctrineStore>;
+  getDoctrine(key: string): Promise<string | undefined>;
+  setDoctrine(key: string, value: string, description?: string): Promise<void>;
+  deleteDoctrine(key: string): Promise<void>;
+  initializeDefaultDoctrines(): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -89,6 +100,80 @@ export class MemStorage implements IStorage {
 
   async deleteAnalysis(id: string): Promise<void> {
     await db.delete(analysisHistory).where(eq(analysisHistory.id, id));
+  }
+
+  async getAllDoctrines(): Promise<DoctrineStore> {
+    const records = await db.select().from(doctrines);
+    const store: DoctrineStore = {};
+    for (const record of records) {
+      store[record.key] = record.value;
+    }
+    return store;
+  }
+
+  async getDoctrine(key: string): Promise<string | undefined> {
+    const [record] = await db.select()
+      .from(doctrines)
+      .where(eq(doctrines.key, key))
+      .limit(1);
+    return record?.value;
+  }
+
+  async setDoctrine(key: string, value: string, description?: string): Promise<void> {
+    await db.insert(doctrines)
+      .values({ key, value, description, updatedAt: new Date() })
+      .onConflictDoUpdate({
+        target: doctrines.key,
+        set: { value, description, updatedAt: new Date() }
+      });
+  }
+
+  async deleteDoctrine(key: string): Promise<void> {
+    await db.delete(doctrines).where(eq(doctrines.key, key));
+  }
+
+  async initializeDefaultDoctrines(): Promise<void> {
+    const existingDoctrines = await db.select().from(doctrines).limit(1);
+    if (existingDoctrines.length > 0) {
+      return;
+    }
+
+    const defaultDoctrines: InsertDoctrine[] = [
+      {
+        key: "LAW_FORM",
+        value: "dispositional proportionality (not universal regularity)",
+        description: "Laws encode proportional dependencies among parameters, not exceptionless sequences"
+      },
+      {
+        key: "DN_MODEL",
+        value: "rejected",
+        description: "Deductive-Nomological model is fundamentally mistaken"
+      },
+      {
+        key: "EXPLANATION",
+        value: "singular causal recognition → law quantifies proportionality",
+        description: "Explanation requires articulating proportional structure, not subsumption under universal generalization"
+      },
+      {
+        key: "REGULARITY_STATUS",
+        value: "surface shadow; not constitutive",
+        description: "Regularities are visible surface of dependencies, not their foundation"
+      },
+      {
+        key: "EXPLANATION_ORDER",
+        value: "instance_to_law",
+        description: "We learn singular causal links first, then articulate laws; not law-to-instance as DN proposes"
+      },
+      {
+        key: "LAW_TYPE",
+        value: "proportional_dependencies",
+        description: "Laws represent dispositional or statistical proportional constraints"
+      }
+    ];
+
+    for (const doctrine of defaultDoctrines) {
+      await db.insert(doctrines).values(doctrine);
+    }
   }
 }
 

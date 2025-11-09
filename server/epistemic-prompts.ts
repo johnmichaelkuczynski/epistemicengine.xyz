@@ -313,13 +313,17 @@ Key principles:
 - Flag contradictions explicitly before resolving them
 - ContinuityComposite should reflect overall truth maintenance quality`;
 
-export const COGNITIVE_CONTINUITY_USER_PROMPT = (text: string, priorContext?: string) => {
+export const COGNITIVE_CONTINUITY_USER_PROMPT = (text: string, priorContext?: string, doctrineContext?: string) => {
   const contextNote = priorContext 
     ? `\n\nPRIOR CONTEXT (for cross-phase comparison):\n${priorContext}\n\n`
     : '\n\nNOTE: No prior context provided. Analyze internal coherence within this passage.\n\n';
   
-  return `Perform a three-pass cognitive continuity analysis on the following text.${contextNote}TEXT:
+  const doctrineNote = doctrineContext
+    ? `\n\n${doctrineContext}\n\n`
+    : '';
+  
+  return `Perform a three-pass cognitive continuity analysis on the following text.${contextNote}${doctrineNote}TEXT:
 ${text}
 
-Provide a complete JSON response following the specified format.`;
+Provide a complete JSON response following the specified format.${doctrineContext ? '\n\nIMPORTANT: If Cross-Phase Coherence < 0.5, your continuity-aligned rewrite MUST resolve the doctrine conflicts by aligning the passage with the authoritative doctrine baseline.' : ''}`;
 };

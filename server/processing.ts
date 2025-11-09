@@ -20,6 +20,8 @@ import type {
   CognitiveIntegrityResult,
   CognitiveContinuityResult,
 } from "@shared/schema";
+import { storage } from "./storage";
+import { extractStanceTokens, computeDoctrineAlignment } from "./stance-extraction";
 
 // ==================== UTILITIES ====================
 
@@ -434,14 +436,53 @@ async function processCognitiveContinuityChunk(
   text: string,
   priorContext?: string
 ): Promise<CognitiveContinuityResult> {
+  // STEP 1: Load doctrines from database
+  const doctrines = await storage.getAllDoctrines();
+  
+  // STEP 2: Extract stance tokens from input text
+  const stanceTokens = await extractStanceTokens(text);
+  
+  // STEP 3: Compute doctrine alignment score
+  const alignment = computeDoctrineAlignment(stanceTokens, doctrines);
+  
+  // STEP 4: Build doctrine context string for AI prompt
+  const doctrineContext = `
+DOCTRINE BASELINE (Authoritative Philosophical Positions):
+${Object.entries(doctrines).map(([key, value]) => `- ${key}: ${value}`).join('\n')}
+
+INPUT STANCE ANALYSIS:
+- Law conception: ${stanceTokens.law_kind}
+- Explanation order: ${stanceTokens.explanation_order}
+- DN model commitment: ${stanceTokens.dn_commitment}
+- Regularity role: ${stanceTokens.regularity_role}
+- Detection confidence: ${stanceTokens.confidence.toFixed(2)}
+
+DOCTRINE ALIGNMENT:
+- Cross-Phase Coherence: ${alignment.crossPhaseCoherence.toFixed(2)}
+- Conflicts detected: ${alignment.conflicts.length > 0 ? alignment.conflicts.join('; ') : 'None'}
+- Alignments: ${alignment.alignments.length > 0 ? alignment.alignments.join('; ') : 'None'}
+
+DIRECTIVE: ${alignment.crossPhaseCoherence < 0.5 ? 'CONFLICT DETECTED - Rewrite required to align with doctrine baseline' : 'Continue with analysis'}
+`;
+
+  // STEP 5: Call AI with doctrine-aware prompts
   const completion = await getAICompletion({
     systemPrompt: COGNITIVE_CONTINUITY_SYSTEM_PROMPT,
-    userPrompt: COGNITIVE_CONTINUITY_USER_PROMPT(text, priorContext),
+    userPrompt: COGNITIVE_CONTINUITY_USER_PROMPT(text, priorContext, doctrineContext),
     temperature: 0.5,
     maxTokens: 4096,
   });
 
   const result: CognitiveContinuityResult = JSON.parse(completion);
+  
+  // Override Cross-Phase Coherence with doctrine alignment score
+  result.diagnostics.CrossPhaseCoherence = alignment.crossPhaseCoherence;
+  
+  // Add doctrine conflict details to conflict_nodes if not already present
+  const doctrineConflicts = alignment.conflicts.map(c => `Doctrine conflict: ${c}`);
+  const combinedNodes = [...result.conflict_nodes, ...doctrineConflicts];
+  result.conflict_nodes = Array.from(new Set(combinedNodes));
+  
   return result;
 }
 

@@ -26,14 +26,46 @@ export const analysisHistory = pgTable("analysis_history", {
   createdAtIdx: index("created_at_idx").on(table.createdAt),
 }));
 
+export const doctrines = pgTable("doctrines", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  description: text("description"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
 export type AnalysisHistoryRecord = typeof analysisHistory.$inferSelect;
 export type InsertAnalysisHistory = typeof analysisHistory.$inferInsert;
 
+export type DoctrineRecord = typeof doctrines.$inferSelect;
+export type InsertDoctrine = typeof doctrines.$inferInsert;
+
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertAnalysisHistorySchema = createInsertSchema(analysisHistory).omit({ id: true, createdAt: true });
+
+// ==================== DOCTRINE MANAGEMENT ====================
+
+export const doctrineEntrySchema = z.object({
+  key: z.string(),
+  value: z.string(),
+  description: z.string().optional(),
+});
+
+export type DoctrineEntry = z.infer<typeof doctrineEntrySchema>;
+
+export const doctrineStoreSchema = z.record(z.string());
+
+export type DoctrineStore = z.infer<typeof doctrineStoreSchema>;
+
+export const updateDoctrineRequestSchema = z.object({
+  key: z.string(),
+  value: z.string(),
+  description: z.string().optional(),
+});
+
+export type UpdateDoctrineRequest = z.infer<typeof updateDoctrineRequestSchema>;
 
 // ==================== ANALYSIS TYPES ====================
 

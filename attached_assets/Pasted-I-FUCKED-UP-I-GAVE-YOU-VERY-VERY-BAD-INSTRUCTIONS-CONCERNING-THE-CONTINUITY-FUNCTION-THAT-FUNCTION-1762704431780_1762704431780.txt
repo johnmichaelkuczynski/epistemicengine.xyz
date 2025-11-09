@@ -1,0 +1,69 @@
+I FUCKED UP. I GAVE YOU VERY VERY BAD INSTRUCTIONS CONCERNING THE CONTINUITY FUNCTION. THAT FUNCTION IS SUPPOSED TO DETERMINE A GIVEN TEXTS CONTINUITY WITH SPECIFIC OTHER TEXTS OF THE USER'S CHOOSING AND TO REWRITE SAID TEXT TO MAXIMIZE CONTINUITY WITH THOSE TEXTS. HERE ARE THE COMPLETE INSTRUCTIONS. THE PREVIOUS CONTINUITY FUNCTION IS SHIT. RIP IT OUT AND START OVER. AND MAKE SURE TO INCLUDE A NEONDATABASE. ALSO, GIVE USERS THE OPTION OF LOGGING IN (WITH JUST A USERNAME: NO PASSWORD), SO THAT THE APP KNOWS WHICH DATABASE TO STORE THE SAMPLES TO. USERS SHOULD NOT HAVE TO LOG INTO ACCESS THE SITE; THEY ONLY HAVE TO LOG IN IF THEY WANT TO ACCESS FUNCTIONS (SUCH AS THE CONITINUITY FUNCTION) THAT INVOLVE MEMORY/DATABASE
+
+FUNCTION 5 Cognitive Continuity Layer (Truth Maintenance / Epistemic Coherence Engine)
+Purpose
+ 
+Function Name
+
+continuityCheck(subsetIds: number[], newText: string)
+
+🧠 Purpose
+
+Compare a new text (e.g. Paper 501) to a user-selected subset of previously uploaded texts (e.g. Papers 12–15).
+The goal is to determine conceptual and terminological coherence — not truth, agreement, or global continuity.
+
+⚙️ Core Logic
+
+Data persistence
+
+Every uploaded or generated text is stored (unless explicitly cleared).
+
+Each text is given a unique ID and indexed for conceptual embedding comparison.
+
+User selection
+
+When using the Continuity function, the user must select which prior texts to compare against (by ID, tag, or filename).
+
+The system never assumes continuity with all stored content.
+
+Continuity evaluation
+
+For each selected text:
+
+Compute semantic similarity (embedding or vector cosine)
+
+Detect terminology overlap, conceptual drift, and contradiction markers
+
+Return per-pair scores and an overall composite.
+
+Continuity output structure
+
+{
+  "target": "Paper 501",
+  "reference_set": ["Paper 12", "Paper 13", "Paper 15"],
+  "composite_score": 0.67,
+  "pairwise": {
+    "Paper 12": 0.82,
+    "Paper 13": 0.75,
+    "Paper 15": 0.43
+  },
+  "alignment_summary": [
+    "Aligns with Papers 12–13 on causal proportionality framework",
+    "Diverges from Paper 15 on definition of 'law' and DN explanation structure"
+  ],
+  "continuity_rewrite": "Optional—regenerates newText rewritten for coherence with the dominant pattern in selected references."
+}
+
+
+Optional rewrite
+If the user toggles “align,” the module can automatically rewrite the new text so that it harmonizes terminologically and conceptually with the selected reference subset.
+
+Storage management
+
+The user can clear stored texts at any time.
+
+Otherwise, all prior texts remain available for selective continuity checks.
+
+💡 Example Instruction to Agent
+
+“Compare Paper 501 with Papers 12–15 and show which ideas or definitions diverge. Then rewrite 501 for continuity with 12–14 only.”
