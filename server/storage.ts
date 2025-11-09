@@ -7,9 +7,12 @@ import {
   type DoctrineStore,
   type DoctrineRecord,
   type InsertDoctrine,
+  type StoredText,
+  type InsertStoredText,
   analysisHistory,
   users,
-  doctrines
+  doctrines,
+  storedTexts
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { drizzle } from "drizzle-orm/neon-serverless";

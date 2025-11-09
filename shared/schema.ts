@@ -33,6 +33,21 @@ export const doctrines = pgTable("doctrines", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const storedTexts = pgTable("stored_texts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id"),
+  title: text("title").notNull(),
+  text: text("text").notNull(),
+  wordCount: integer("word_count").notNull(),
+  moduleType: text("module_type"),
+  tags: text("tags").array(),
+  embedding: text("embedding"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdIdx: index("stored_texts_user_id_idx").on(table.userId),
+  createdAtIdx: index("stored_texts_created_at_idx").on(table.createdAt),
+}));
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
@@ -41,6 +56,9 @@ export type InsertAnalysisHistory = typeof analysisHistory.$inferInsert;
 
 export type DoctrineRecord = typeof doctrines.$inferSelect;
 export type InsertDoctrine = typeof doctrines.$inferInsert;
+
+export type StoredText = typeof storedTexts.$inferSelect;
+export type InsertStoredText = typeof storedTexts.$inferInsert;
 
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertAnalysisHistorySchema = createInsertSchema(analysisHistory).omit({ id: true, createdAt: true });
@@ -201,24 +219,17 @@ export type CognitiveIntegrityResult = z.infer<typeof cognitiveIntegrityResultSc
 
 // ==================== COGNITIVE CONTINUITY LAYER MODULE ====================
 
-export const continuityDiagnosticsSchema = z.object({
-  CrossPhaseCoherence: z.number().min(0).max(1),
-  TemporalStability: z.number().min(0).max(1),
-  ProgressiveIntegration: z.number().min(0).max(1),
-  ErrorPropagationIndex: z.number().min(0).max(1),
-  SystemicCompression: z.number().min(0).max(1),
-  ContinuityComposite: z.number().min(0).max(1),
-});
+export const pairwiseScoreSchema = z.record(z.string(), z.number().min(0).max(1));
 
-export type ContinuityDiagnostics = z.infer<typeof continuityDiagnosticsSchema>;
+export type PairwiseScore = z.infer<typeof pairwiseScoreSchema>;
 
 export const cognitiveContinuityResultSchema = z.object({
-  cross_phase_context: z.string(),
-  continuity_analysis: z.record(z.string(), z.any()),
-  conflict_nodes: z.array(z.string()),
-  continuity_aligned_rewrite: z.string(),
-  diagnostics: continuityDiagnosticsSchema,
-  interpretation_summary: z.string(),
+  target: z.string(),
+  referenceSet: z.array(z.string()),
+  compositeScore: z.number().min(0).max(1),
+  pairwise: pairwiseScoreSchema,
+  alignmentSummary: z.array(z.string()),
+  continuityRewrite: z.string().optional(),
 });
 
 export type CognitiveContinuityResult = z.infer<typeof cognitiveContinuityResultSchema>;
@@ -228,6 +239,8 @@ export type CognitiveContinuityResult = z.infer<typeof cognitiveContinuityResult
 export const analyzeRequestSchema = z.object({
   text: z.string().min(1, "Text cannot be empty").max(50000, "Text too long"),
   moduleType: moduleTypeSchema,
+  referenceIds: z.array(z.string()).optional(),
+  alignRewrite: z.boolean().optional(),
 });
 
 export type AnalyzeRequest = z.infer<typeof analyzeRequestSchema>;
