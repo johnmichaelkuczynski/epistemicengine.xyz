@@ -34,6 +34,7 @@ Preferred communication style: Simple, everyday language.
 - `TextInputArea` - Word-counted input with 2,000-word limit validation
 - Module-specific result components (`EpistemicInferenceResults`, `JustificationBuilderResults`, `KnowledgeUtilityResults`)
 - `CoherenceScore` - Visual progress indicator for epistemic metrics
+- **TXT Export** - Each module includes a download button that exports complete analysis results as formatted plain text files
 
 ### Backend Architecture
 
@@ -56,14 +57,18 @@ Preferred communication style: Simple, everyday language.
 
 ### AI Integration Architecture
 
-**Multi-Provider Strategy** with automatic fallback:
-- **Primary Provider**: Anthropic Claude (via `@anthropic-ai/sdk`)
-- **Fallback Provider**: OpenAI GPT (via `openai` SDK)
-- **Provider Selection**: Configurable per request with automatic failover if primary errors
+**Three-Tier Provider Strategy** with automatic cascading fallback:
+- **Primary Provider**: Anthropic Claude (via Replit AI Integrations - `@anthropic-ai/sdk`)
+- **Secondary Fallback**: OpenAI GPT-4o (via `openai` SDK)
+- **Tertiary Fallback**: DeepSeek (via OpenAI-compatible API)
+- **Failover Logic**: Automatic sequential fallback (Anthropic → OpenAI → DeepSeek) if providers fail
 
-**Rationale**: Ensures high availability and allows provider flexibility based on performance, cost, or model capabilities. Both providers support the complex reasoning tasks required for epistemic analysis.
+**Rationale**: Ensures maximum uptime and reliability. DeepSeek provides cost-effective backup (1/10th OpenAI pricing) while maintaining quality for complex epistemic reasoning tasks.
 
-**Configuration**: API keys via environment variables (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`)
+**Configuration**: API keys via environment variables:
+- `AI_INTEGRATIONS_ANTHROPIC_API_KEY` + `AI_INTEGRATIONS_ANTHROPIC_BASE_URL` (Replit AI Integrations)
+- `OPENAI_API_KEY` (OpenAI)
+- `DEEPSEEK_API_KEY` (DeepSeek - optional)
 
 ### Data Storage Architecture
 
@@ -97,8 +102,9 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### AI Services
-- **Anthropic Claude API** - Primary reasoning engine for epistemic analysis
-- **OpenAI GPT API** - Fallback reasoning engine
+- **Anthropic Claude API** (via Replit AI Integrations) - Primary reasoning engine for epistemic analysis
+- **OpenAI GPT-4o API** - Secondary fallback reasoning engine
+- **DeepSeek API** - Tertiary fallback reasoning engine (cost-effective backup)
 
 ### Database & Storage
 - **Neon Serverless PostgreSQL** - Prepared database infrastructure (configured but analysis storage not yet active)

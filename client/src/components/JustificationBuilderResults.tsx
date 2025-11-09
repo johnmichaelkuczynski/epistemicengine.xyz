@@ -75,6 +75,11 @@ export function JustificationBuilderResults({ result }: JustificationBuilderResu
     }
     
     text += "\n" + "=".repeat(50) + "\n";
+    text += "IMPROVED REWRITE\n";
+    text += "=".repeat(50) + "\n\n";
+    text += `${result.rewrittenText}\n\n`;
+    
+    text += "\n" + "=".repeat(50) + "\n";
     text += `Generated: ${new Date().toLocaleString()}\n`;
     
     const blob = new Blob([text], { type: "text/plain" });
