@@ -1,10 +1,11 @@
 import { useState, useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, AlertCircle, CheckCircle2, Moon, Sun, History as HistoryIcon, X, LogOut } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Loader2, AlertCircle, CheckCircle2, Moon, Sun, History as HistoryIcon, X, Check } from "lucide-react";
 import { ModuleSelector } from "@/components/ModuleSelector";
 import { TextInputArea } from "@/components/TextInputArea";
 import { ReferenceTextSelector } from "@/components/ReferenceTextSelector";
@@ -22,21 +23,21 @@ export default function Home() {
   const [inputText, setInputText] = useState("");
   const [selectedReferenceIds, setSelectedReferenceIds] = useState<string[]>([]);
   const [darkMode, setDarkMode] = useState(false);
-  const [, setLocation] = useLocation();
+  const [usernameInput, setUsernameInput] = useState("");
   const { toast } = useToast();
 
   const { data: userData } = useQuery<{ success: boolean; user: any }>({
     queryKey: ["/api/me"],
   });
 
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/logout", {});
+  const loginMutation = useMutation({
+    mutationFn: async (username: string) => {
+      const res = await apiRequest("POST", "/api/login", { username });
       return res.json();
     },
     onSuccess: () => {
-      queryClient.clear();
-      setLocation("/login");
+      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+      setUsernameInput("");
     },
   });
 
@@ -147,30 +148,57 @@ export default function Home() {
       {/* Header */}
       <header className="border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold text-foreground">Epistemic Reasoning Engine</h1>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Logged in as: <span className="font-medium">{userData?.user?.username || 'Guest'}</span>
+                AI-powered analysis of argumentative text
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
+              {!userData?.user ? (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (usernameInput.trim()) {
+                      loginMutation.mutate(usernameInput.trim());
+                    }
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Input
+                    type="text"
+                    placeholder="Username"
+                    value={usernameInput}
+                    onChange={(e) => setUsernameInput(e.target.value)}
+                    className="w-40"
+                    disabled={loginMutation.isPending}
+                    data-testid="input-username"
+                  />
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={loginMutation.isPending || !usernameInput.trim()}
+                    data-testid="button-set-username"
+                  >
+                    {loginMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Check className="h-4 w-4" />
+                    )}
+                  </Button>
+                </form>
+              ) : (
+                <div className="text-sm text-muted-foreground" data-testid="text-username">
+                  {userData.user.username}
+                </div>
+              )}
               <Link href="/history">
                 <Button variant="ghost" size="sm" data-testid="button-history">
                   <HistoryIcon className="h-4 w-4 mr-2" />
                   History
                 </Button>
               </Link>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => logoutMutation.mutate()}
-                disabled={logoutMutation.isPending}
-                data-testid="button-logout"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
               <Button
                 variant="ghost"
                 size="icon"

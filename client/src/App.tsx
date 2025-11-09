@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/Home";
 import History from "@/pages/History";
 import NotFound from "@/pages/not-found";
-import { UsernamePrompt } from "@/components/UsernamePrompt";
 
 function Router() {
   return (
@@ -22,7 +21,6 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <UsernamePrompt />
         <Toaster />
         <Router />
       </TooltipProvider>
