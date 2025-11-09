@@ -1,0 +1,131 @@
+🧩 Instruction for Replit Agent — Cognitive Integrity Layer (Truth vs. Simulation Control)
+
+Purpose:
+Create and apply a Cognitive Integrity Layer that evaluates any uploaded or inputted passage for its truth-simulation ratio—that is, whether the text expresses real reasoning, fake reasoning, or rhetorical simulation. The function must output:
+
+A reconstructed, truth-bearing rewrite of the passage.
+
+A diagnostic tag block (numerical output).
+
+A short interpretation summary.
+
+⚙️ CORE LOGIC
+
+When a user inputs text, the system performs three internal passes:
+
+Authorship Detection Pass (Simulation Filter)
+
+Detects whether reasoning is genuine (epistemically grounded) or simulated (stylistic mimicry, empty scholasticism).
+
+Flags rhetorical scaffolding (“I argue that…,” “this paper will…”) and replaces it with inferential content.
+
+Inferential Reconstruction Pass
+
+Rebuilds the text into a logically coherent, truth-bearing version.
+
+Restores missing causal or evidential links.
+
+Reduces meta-narration to conceptual movement.
+
+Integrity Scoring Pass
+
+Produces normalized scores between 0 and 1 for the following parameters:
+
+Parameter	Definition
+RealityAnchor	How well claims are tied to observable or inferential reality.
+CausalDepth	Degree of explicit cause-effect reasoning.
+Friction	Conceptual resistance (presence of difficulty, tension, nontrivial thought).
+Compression	Density and efficiency of conceptual content.
+SimulationIndex	Degree of verbal mimicry or pseudo-intellectual phrasing.
+LevelCoherence	Structural integration of all conceptual levels.
+CompositeScore	Weighted average (truth-bearing integrity).
+IntegrityType	Qualitative classification (e.g., “Analytic Authentic → Speculative Expansion”).
+🧠 OUTPUT FORMAT
+
+Every processed passage must return this tripartite structure:
+
+INTEGRITY-STAMPED RECONSTRUCTION
+
+(Cognitive Integrity Layer — Truth vs. Simulation Control)
+
+Authenticity Commentary
+Brief narrative explanation of what kind of reasoning the passage exhibits (e.g., “academic simulation,” “hyperassertive polemic,” “analytic authentic”).
+
+Integrity-Reconstructed Passage
+The rewritten version that expresses genuine reasoning and removes simulation artifacts.
+
+Diagnostic Tag Block
+
+{
+  "RealityAnchor": 0.xx,
+  "CausalDepth": 0.xx,
+  "Friction": 0.xx,
+  "Compression": 0.xx,
+  "SimulationIndex": 0.xx,
+  "LevelCoherence": 0.xx,
+  "CompositeScore": 0.xx,
+  "IntegrityType": "..."
+}
+
+
+Interpretation
+Short prose summary clarifying what was fixed, what truth signal was restored, and what kind of output this now represents.
+
+📘 EXAMPLES
+
+Example 1 — Pseudo-academic (Transcendental Empiricism abstract)
+
+Detected: Academic Simulation → Conceptual Reconstruction
+
+Composite Score: 0.42
+
+Reconstruction replaces meta-outline with actual inferential content.
+
+Output: Clear statement of the mental-content problem and why McDowell/Gaskin fail.
+
+Example 2 — Philosophical polemic (Lewis critique)
+
+Detected: Analytic Authentic → Hyperassertive (Polemic-Compressed)
+
+Composite Score: 0.82
+
+Reconstruction removes rhetorical attack and restores logical argument about modal dependence.
+
+Example 3 — Deep theoretical essay (Group psychology passage)
+
+Detected: Analytic Authentic → Speculative Expansion (High Originality / Low Empirical Constraint)
+
+Composite Score: 0.88
+
+Reconstruction trims evaluative overreach and expresses the collective-primacy thesis as a testable explanatory model.
+
+🔁 INTEGRATION RULES
+
+If CompositeScore < 0.5, route output to Conceptual Reconstruction Submodule.
+
+If 0.5 ≤ CompositeScore < 0.8, mark as Authentic Partial and forward to Inference Module for reasoning augmentation.
+
+If CompositeScore ≥ 0.8, mark as High-Integrity Source and store in the Epistemic Core Database for meta-training of other apps (e.g., Intelligence Meter, Inference Module, Book Builder).
+
+⚡ FUNCTIONAL OUTPUT TYPE
+type IntegrityLayerOutput = {
+  authenticity_commentary: string,
+  reconstructed_passage: string,
+  diagnostic_block: object,
+  interpretation_summary: string
+}
+
+🔒 CONTROL CONSTRAINTS
+
+Never rewrite stylistically unless doing so improves inferential clarity.
+
+Never summarize away the core argument.
+
+Never inflate scores; scoring must reflect actual epistemic performance.
+
+Always preserve authorial semantic intent while removing simulation.
+
+💡 END GOAL
+
+This Cognitive Integrity Layer is the central epistemic validation organ for all ZHI Systems apps (Intelligence Meter, Originality Meter, Inference Module, Living Book Generator).
+Its task: determine what counts as genuine cognition, restore truth-bearing form, and pass structured metrics for downstream use.
