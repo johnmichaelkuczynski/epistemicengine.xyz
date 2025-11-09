@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle, CheckCircle2, Moon, Sun, History as HistoryIcon, X } from "lucide-react";
 import { ModuleSelector } from "@/components/ModuleSelector";
 import { TextInputArea } from "@/components/TextInputArea";
+import { ReferenceTextSelector } from "@/components/ReferenceTextSelector";
 import { EpistemicInferenceResults } from "@/components/EpistemicInferenceResults";
 import { JustificationBuilderResults } from "@/components/JustificationBuilderResults";
 import { KnowledgeUtilityResults } from "@/components/KnowledgeUtilityResults";
@@ -19,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 export default function Home() {
   const [selectedModule, setSelectedModule] = useState<ModuleType>("epistemic-inference");
   const [inputText, setInputText] = useState("");
+  const [selectedReferenceIds, setSelectedReferenceIds] = useState<string[]>([]);
   const [darkMode, setDarkMode] = useState(false);
   const { toast } = useToast();
 
@@ -32,7 +34,7 @@ export default function Home() {
     return inputText.trim().split(/\s+/).filter(word => word.length > 0).length;
   }, [inputText]);
 
-  const analyzeMutation = useMutation<AnalyzeResponse, Error, { text: string; moduleType: ModuleType }>({
+  const analyzeMutation = useMutation<AnalyzeResponse, Error, { text: string; moduleType: ModuleType; referenceIds?: string[]; alignRewrite?: boolean }>({
     mutationFn: async (data) => {
       const res = await apiRequest("POST", "/api/analyze", data);
       const response = await res.json();
@@ -87,7 +89,13 @@ export default function Home() {
       });
     }
 
-    analyzeMutation.mutate({ text: inputText, moduleType: selectedModule });
+    const requestData: any = { text: inputText, moduleType: selectedModule };
+    if (selectedModule === "cognitive-continuity") {
+      requestData.referenceIds = selectedReferenceIds;
+      requestData.alignRewrite = false;
+    }
+
+    analyzeMutation.mutate(requestData);
   };
 
   const handleClear = () => {
@@ -160,6 +168,16 @@ export default function Home() {
               onModuleChange={handleModuleChange}
             />
           </Card>
+
+          {/* Reference Text Selector (only for Cognitive Continuity) */}
+          {selectedModule === "cognitive-continuity" && (
+            <Card className="p-6">
+              <ReferenceTextSelector
+                selectedIds={selectedReferenceIds}
+                onSelectionChange={setSelectedReferenceIds}
+              />
+            </Card>
+          )}
 
           {/* Input Section */}
           <Card className="p-6">

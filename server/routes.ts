@@ -28,7 +28,7 @@ export function registerRoutes(app: Express) {
         });
       }
 
-      const { text, moduleType } = validationResult.data;
+      const { text, moduleType, referenceIds = [], alignRewrite = false } = validationResult.data;
       const wordCount = countWords(text);
 
       // Check word limit (10,000 words with automatic chunking)
@@ -76,7 +76,7 @@ export function registerRoutes(app: Express) {
           break;
         
         case "cognitive-continuity":
-          result = await processCognitiveContinuity(text);
+          result = await processCognitiveContinuity(text, referenceIds, alignRewrite);
           break;
         
         default:
@@ -243,6 +243,41 @@ export function registerRoutes(app: Express) {
       return res.status(500).json({
         success: false,
         error: "Failed to initialize doctrines",
+      });
+    }
+  });
+
+  // Stored texts endpoints
+  app.get("/api/stored-texts", async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 100;
+      const texts = await storage.getStoredTexts(undefined, limit);
+      
+      return res.json({
+        success: true,
+        texts,
+      });
+    } catch (error) {
+      console.error("Failed to fetch stored texts:", error);
+      return res.status(500).json({
+        success: false,
+        error: "Failed to fetch stored texts",
+      });
+    }
+  });
+
+  app.delete("/api/stored-texts/:id", async (req: Request, res: Response) => {
+    try {
+      await storage.deleteStoredText(req.params.id);
+      
+      return res.json({
+        success: true,
+      });
+    } catch (error) {
+      console.error("Failed to delete stored text:", error);
+      return res.status(500).json({
+        success: false,
+        error: "Failed to delete stored text",
       });
     }
   });

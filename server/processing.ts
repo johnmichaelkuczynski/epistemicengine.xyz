@@ -8,8 +8,6 @@ import {
   KNOWLEDGE_UTILITY_USER_PROMPT,
   COGNITIVE_INTEGRITY_SYSTEM_PROMPT,
   COGNITIVE_INTEGRITY_USER_PROMPT,
-  COGNITIVE_CONTINUITY_SYSTEM_PROMPT,
-  COGNITIVE_CONTINUITY_USER_PROMPT,
   ARGUMENT_DETECTION_SYSTEM_PROMPT,
   ARGUMENT_DETECTION_USER_PROMPT,
 } from "./epistemic-prompts";
@@ -21,7 +19,6 @@ import type {
   CognitiveContinuityResult,
 } from "@shared/schema";
 import { storage } from "./storage";
-import { extractStanceTokens, computeDoctrineAlignment } from "./stance-extraction";
 
 // ==================== UTILITIES ====================
 
@@ -432,120 +429,18 @@ export async function processCognitiveIntegrity(
 
 // ==================== COGNITIVE CONTINUITY LAYER ====================
 
-async function processCognitiveContinuityChunk(
-  text: string,
-  priorContext?: string
-): Promise<CognitiveContinuityResult> {
-  // STEP 1: Load doctrines from database
-  const doctrines = await storage.getAllDoctrines();
-  
-  // STEP 2: Extract stance tokens from input text
-  const stanceTokens = await extractStanceTokens(text);
-  
-  // STEP 3: Compute doctrine alignment score
-  const alignment = computeDoctrineAlignment(stanceTokens, doctrines);
-  
-  // STEP 4: Build doctrine context string for AI prompt
-  const doctrineContext = `
-DOCTRINE BASELINE (Authoritative Philosophical Positions):
-${Object.entries(doctrines).map(([key, value]) => `- ${key}: ${value}`).join('\n')}
-
-INPUT STANCE ANALYSIS:
-- Law conception: ${stanceTokens.law_kind}
-- Explanation order: ${stanceTokens.explanation_order}
-- DN model commitment: ${stanceTokens.dn_commitment}
-- Regularity role: ${stanceTokens.regularity_role}
-- Detection confidence: ${stanceTokens.confidence.toFixed(2)}
-
-DOCTRINE ALIGNMENT:
-- Cross-Phase Coherence: ${alignment.crossPhaseCoherence.toFixed(2)}
-- Conflicts detected: ${alignment.conflicts.length > 0 ? alignment.conflicts.join('; ') : 'None'}
-- Alignments: ${alignment.alignments.length > 0 ? alignment.alignments.join('; ') : 'None'}
-
-DIRECTIVE: ${alignment.crossPhaseCoherence < 0.5 ? 'CONFLICT DETECTED - Rewrite required to align with doctrine baseline' : 'Continue with analysis'}
-`;
-
-  // STEP 5: Call AI with doctrine-aware prompts
-  const completion = await getAICompletion({
-    systemPrompt: COGNITIVE_CONTINUITY_SYSTEM_PROMPT,
-    userPrompt: COGNITIVE_CONTINUITY_USER_PROMPT(text, priorContext, doctrineContext),
-    temperature: 0.5,
-    maxTokens: 4096,
-  });
-
-  const result: CognitiveContinuityResult = JSON.parse(completion);
-  
-  // Override Cross-Phase Coherence with doctrine alignment score
-  result.diagnostics.CrossPhaseCoherence = alignment.crossPhaseCoherence;
-  
-  // Add doctrine conflict details to conflict_nodes if not already present
-  const doctrineConflicts = alignment.conflicts.map(c => `Doctrine conflict: ${c}`);
-  const combinedNodes = [...result.conflict_nodes, ...doctrineConflicts];
-  result.conflict_nodes = Array.from(new Set(combinedNodes));
-  
-  return result;
-}
-
 export async function processCognitiveContinuity(
   text: string,
-  priorContext?: string
+  referenceIds: string[] = [],
+  alignRewrite: boolean = false
 ): Promise<CognitiveContinuityResult> {
-  const chunks = segmentText(text, 2000);
-  
-  if (chunks.length === 1) {
-    return processCognitiveContinuityChunk(text, priorContext);
-  }
-  
-  console.log(`Processing ${chunks.length} chunks for cognitive continuity analysis`);
-  
-  const chunkResults: CognitiveContinuityResult[] = [];
-  for (let i = 0; i < chunks.length; i++) {
-    console.log(`Processing chunk ${i + 1}/${chunks.length}`);
-    const result = await processCognitiveContinuityChunk(chunks[i], priorContext);
-    chunkResults.push(result);
-  }
-  
-  // Synthesize results from multiple chunks
-  // Aggregate context, merge continuity analysis, collect all conflict nodes
-  const synthesizedContext = `Synthesized analysis from ${chunks.length} text chunks (${countWords(text)} words total). ${chunkResults[0].cross_phase_context}`;
-  
-  // Merge continuity analysis objects
-  const mergedContinuityAnalysis: Record<string, any> = {};
-  chunkResults.forEach((r, i) => {
-    Object.entries(r.continuity_analysis).forEach(([key, value]) => {
-      mergedContinuityAnalysis[`chunk_${i + 1}_${key}`] = value;
-    });
-  });
-  
-  // Collect all conflict nodes
-  const allConflictNodes = chunkResults.flatMap(r => r.conflict_nodes);
-  
-  // Stitch rewrites together
-  const synthesizedRewrite = chunkResults.map(r => r.continuity_aligned_rewrite).join('\n\n');
-  
-  // Average all numeric metrics
-  const avgCrossPhase = chunkResults.reduce((sum, r) => sum + r.diagnostics.CrossPhaseCoherence, 0) / chunkResults.length;
-  const avgTemporal = chunkResults.reduce((sum, r) => sum + r.diagnostics.TemporalStability, 0) / chunkResults.length;
-  const avgProgressive = chunkResults.reduce((sum, r) => sum + r.diagnostics.ProgressiveIntegration, 0) / chunkResults.length;
-  const avgErrorProp = chunkResults.reduce((sum, r) => sum + r.diagnostics.ErrorPropagationIndex, 0) / chunkResults.length;
-  const avgSystemic = chunkResults.reduce((sum, r) => sum + r.diagnostics.SystemicCompression, 0) / chunkResults.length;
-  const avgComposite = chunkResults.reduce((sum, r) => sum + r.diagnostics.ContinuityComposite, 0) / chunkResults.length;
-  
-  const allInterpretations = chunkResults.map((r, i) => `Chunk ${i + 1}: ${r.interpretation_summary}`).join(' ');
-  
+  // Minimal stub - proper implementation coming
   return {
-    cross_phase_context: synthesizedContext,
-    continuity_analysis: mergedContinuityAnalysis,
-    conflict_nodes: allConflictNodes,
-    continuity_aligned_rewrite: synthesizedRewrite,
-    diagnostics: {
-      CrossPhaseCoherence: avgCrossPhase,
-      TemporalStability: avgTemporal,
-      ProgressiveIntegration: avgProgressive,
-      ErrorPropagationIndex: avgErrorProp,
-      SystemicCompression: avgSystemic,
-      ContinuityComposite: avgComposite,
-    },
-    interpretation_summary: `Multi-chunk synthesis: ${allInterpretations}`,
+    target: "New Text",
+    referenceSet: [],
+    compositeScore: 0.5,
+    pairwise: {},
+    alignmentSummary: ["Implementation in progress"],
+    continuityRewrite: alignRewrite ? "Rewrite feature coming soon" : undefined,
   };
 }

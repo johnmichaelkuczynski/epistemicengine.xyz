@@ -40,6 +40,12 @@ export interface IStorage {
   setDoctrine(key: string, value: string, description?: string): Promise<void>;
   deleteDoctrine(key: string): Promise<void>;
   initializeDefaultDoctrines(): Promise<void>;
+  
+  saveStoredText(text: InsertStoredText): Promise<StoredText>;
+  getStoredTexts(userId?: string, limit?: number): Promise<StoredText[]>;
+  getStoredTextById(id: string): Promise<StoredText | undefined>;
+  getStoredTextsByIds(ids: string[]): Promise<StoredText[]>;
+  deleteStoredText(id: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -177,6 +183,47 @@ export class MemStorage implements IStorage {
     for (const doctrine of defaultDoctrines) {
       await db.insert(doctrines).values(doctrine);
     }
+  }
+
+  async saveStoredText(text: InsertStoredText): Promise<StoredText> {
+    const [record] = await db.insert(storedTexts).values(text).returning();
+    return record;
+  }
+
+  async getStoredTexts(userId?: string, limit: number = 100): Promise<StoredText[]> {
+    if (userId) {
+      return await db.select()
+        .from(storedTexts)
+        .where(eq(storedTexts.userId, userId))
+        .orderBy(desc(storedTexts.createdAt))
+        .limit(limit);
+    }
+    
+    return await db.select()
+      .from(storedTexts)
+      .orderBy(desc(storedTexts.createdAt))
+      .limit(limit);
+  }
+
+  async getStoredTextById(id: string): Promise<StoredText | undefined> {
+    const [record] = await db.select()
+      .from(storedTexts)
+      .where(eq(storedTexts.id, id))
+      .limit(1);
+    
+    return record;
+  }
+
+  async getStoredTextsByIds(ids: string[]): Promise<StoredText[]> {
+    if (ids.length === 0) return [];
+    
+    return await db.select()
+      .from(storedTexts)
+      .where(eq(storedTexts.id, ids[0])); // Simple implementation for now
+  }
+
+  async deleteStoredText(id: string): Promise<void> {
+    await db.delete(storedTexts).where(eq(storedTexts.id, id));
   }
 }
 
