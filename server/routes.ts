@@ -1,5 +1,8 @@
 import type { Express, Request, Response } from "express";
 import { createServer } from "http";
+import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
+import { Pool } from "@neondatabase/serverless";
 import { analyzeRequestSchema, updateDoctrineRequestSchema } from "@shared/schema";
 import {
   countWords,
@@ -12,8 +15,39 @@ import {
 } from "./processing";
 import { storage } from "./storage";
 
+const PgSession = connectPgSimple(session);
+
 export function registerRoutes(app: Express) {
   const server = createServer(app);
+  
+  // Require SESSION_SECRET in environment
+  if (!process.env.SESSION_SECRET) {
+    throw new Error(
+      "SESSION_SECRET environment variable is required for secure session management. " +
+      "Please set a strong random secret (minimum 32 characters)."
+    );
+  }
+  
+  // Configure session middleware
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  
+  app.use(
+    session({
+      store: new PgSession({
+        pool,
+        tableName: "session",
+        createTableIfMissing: true,
+      }),
+      secret: process.env.SESSION_SECRET,
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+      },
+    })
+  );
   
   // ==================== AUTH ROUTES ====================
   
@@ -46,6 +80,8 @@ export function registerRoutes(app: Express) {
       // Store user in session
       req.session.userId = user.id;
       req.session.username = user.username;
+      
+      console.log(`[/api/login] User logged in: ${user.username} (ID: ${user.id}), Session ID: ${req.sessionID}`);
       
       return res.json({
         success: true,
@@ -207,7 +243,9 @@ export function registerRoutes(app: Express) {
       const limit = parseInt(req.query.limit as string) || 50;
       // Filter by logged-in user
       const userId = req.session.userId;
+      console.log(`[/api/history] Session userId: ${userId}, Session ID: ${req.sessionID}`);
       const history = await storage.getAnalysisHistory(userId, limit);
+      console.log(`[/api/history] Retrieved ${history.length} records for userId: ${userId}`);
       
       return res.json({
         success: true,

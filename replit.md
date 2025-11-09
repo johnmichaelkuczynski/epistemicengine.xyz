@@ -79,19 +79,50 @@ Preferred communication style: Simple, everyday language.
 - `OPENAI_API_KEY` (OpenAI)
 - `DEEPSEEK_API_KEY` (DeepSeek - optional)
 
+### Authentication & Session Management
+
+**Authentication Strategy**: Username-only authentication (no password required)
+- Users log in with just a username (case-insensitive)
+- System finds existing user or creates new user automatically
+- Session-based authentication with PostgreSQL-backed storage
+
+**Session Configuration**:
+- **Session Store**: PostgreSQL via `connect-pg-simple` (session table auto-created)
+- **Session Security**: 
+  - Requires `SESSION_SECRET` environment variable (minimum 32 characters recommended)
+  - Server crashes on startup if `SESSION_SECRET` is missing (prevents session forgery)
+  - HTTP-only cookies (prevents XSS attacks)
+  - Secure cookies in production (HTTPS-only)
+  - 30-day session expiration
+- **Session Data**: Stores `userId` and `username` for authenticated users
+
+**Route Protection**:
+- `AuthGuard` component wraps protected routes
+- Redirects to `/login` if not authenticated
+- Uses `/api/me` endpoint to check session status
+
+**API Endpoints**:
+- `POST /api/login` - Username-only login (finds or creates user)
+- `POST /api/logout` - Destroys session and logs out user
+- `GET /api/me` - Returns current authenticated user from session
+
 ### Data Storage Architecture
 
 **Active Database**: PostgreSQL (Neon serverless) with Drizzle ORM
-- **Users**: In-memory storage (`MemStorage` class) for user management
+- **Users**: PostgreSQL storage with indexed username lookup
+  - Table: `users` with columns: id (UUID), username (unique), passwordHash (nullable), createdAt
+  - Username-only authentication (passwordHash always NULL for current implementation)
+  - Case-insensitive username matching
 - **Analysis History**: PostgreSQL database persistence for all completed analyses
   - Table: `analysis_history` with columns: id (UUID), userId, moduleType, inputText, wordCount (integer), result (JSONB), processingTime (integer), createdAt
   - Indexes on userId, moduleType, and createdAt for efficient querying
   - Full CRUD operations: saveAnalysis, getAnalysisHistory, getAnalysisById, deleteAnalysis
   - Automatic saving after each successful analysis
+  - User-specific filtering: All queries filter by `req.session.userId`
 
 **API Endpoints**:
-- `POST /api/analyze` - Processes text and automatically saves results to database
-- `GET /api/history` - Retrieves analysis history with optional limit parameter
+- `POST /api/analyze` - Processes text and automatically saves results to database (requires authentication)
+- `GET /api/history` - Retrieves analysis history for authenticated user
 - `GET /api/history/:id` - Retrieves specific analysis by ID
 - `DELETE /api/history/:id` - Deletes analysis from database
 

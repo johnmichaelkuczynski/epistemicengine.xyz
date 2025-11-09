@@ -49,32 +49,28 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
-  private usersMap: Map<string, User>;
-
   constructor() {
-    this.usersMap = new Map();
+    // No in-memory storage needed - using database for all operations
   }
 
   async getUser(id: string): Promise<User | undefined> {
-    return this.usersMap.get(id);
+    const [user] = await db.select()
+      .from(users)
+      .where(eq(users.id, id))
+      .limit(1);
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.usersMap.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select()
+      .from(users)
+      .where(eq(users.username, username))
+      .limit(1);
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const now = new Date();
-    const user: User = { 
-      id, 
-      username: insertUser.username,
-      passwordHash: insertUser.passwordHash || null,
-      createdAt: now
-    };
-    this.usersMap.set(id, user);
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
