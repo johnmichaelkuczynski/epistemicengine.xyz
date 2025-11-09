@@ -81,10 +81,12 @@ Preferred communication style: Simple, everyday language.
 
 ### Authentication & Session Management
 
-**Authentication Strategy**: Username-only authentication (no password required)
-- Users log in with just a username (case-insensitive)
-- System finds existing user or creates new user automatically
-- Session-based authentication with PostgreSQL-backed storage
+**No-Barrier Authentication Strategy**: Completely optional inline username input
+- **Zero Barriers**: Users access the main page immediately with full functionality (no login page, no dialog, no redirect)
+- **Optional Username**: Small inline username input in page header (w-40 width) - only needed for saving analyses to history
+- **Anonymous Usage**: All analysis features work without authentication - results saved with `userId: null`
+- **Session Persistence**: Username-only login (case-insensitive) - finds existing user or creates new user automatically
+- **Smooth Transition**: Username input replaced with username display after login, persists across page loads
 
 **Session Configuration**:
 - **Session Store**: PostgreSQL via `connect-pg-simple` (session table auto-created)
@@ -96,15 +98,14 @@ Preferred communication style: Simple, everyday language.
   - 30-day session expiration
 - **Session Data**: Stores `userId` and `username` for authenticated users
 
-**Route Protection**:
-- `AuthGuard` component wraps protected routes
-- Redirects to `/login` if not authenticated
-- Uses `/api/me` endpoint to check session status
+**Route Access**:
+- No route protection - all pages accessible without authentication
+- History page shows user-specific analyses when logged in, empty when not
+- Analysis functionality works for both authenticated and anonymous users
 
 **API Endpoints**:
 - `POST /api/login` - Username-only login (finds or creates user)
-- `POST /api/logout` - Destroys session and logs out user
-- `GET /api/me` - Returns current authenticated user from session
+- `GET /api/me` - Returns current authenticated user from session (used to display username in header)
 
 ### Data Storage Architecture
 
@@ -121,7 +122,7 @@ Preferred communication style: Simple, everyday language.
   - User-specific filtering: All queries filter by `req.session.userId`
 
 **API Endpoints**:
-- `POST /api/analyze` - Processes text and automatically saves results to database (requires authentication)
+- `POST /api/analyze` - Processes text and automatically saves results to database (works with or without authentication)
 - `GET /api/history` - Retrieves analysis history for authenticated user
 - `GET /api/history/:id` - Retrieves specific analysis by ID
 - `DELETE /api/history/:id` - Deletes analysis from database
