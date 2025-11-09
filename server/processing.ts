@@ -6,6 +6,8 @@ import {
   JUSTIFICATION_BUILDER_USER_PROMPT,
   KNOWLEDGE_UTILITY_SYSTEM_PROMPT,
   KNOWLEDGE_UTILITY_USER_PROMPT,
+  COGNITIVE_INTEGRITY_SYSTEM_PROMPT,
+  COGNITIVE_INTEGRITY_USER_PROMPT,
   ARGUMENT_DETECTION_SYSTEM_PROMPT,
   ARGUMENT_DETECTION_USER_PROMPT,
 } from "./epistemic-prompts";
@@ -13,6 +15,7 @@ import type {
   EpistemicInferenceResult,
   JustificationBuilderResult,
   KnowledgeUtilityResult,
+  CognitiveIntegrityResult,
 } from "@shared/schema";
 
 // ==================== UTILITIES ====================
@@ -327,5 +330,97 @@ export async function processKnowledgeUtility(
       transformativePotential: `Analysis across ${chunks.length} chunks reveals ${avgUtilityRank > 7 ? 'high' : avgUtilityRank > 5 ? 'moderate' : 'limited'} transformative potential`,
     },
     utilityRank: avgUtilityRank,
+  };
+}
+
+// ==================== COGNITIVE INTEGRITY LAYER MODULE ====================
+
+async function processCognitiveIntegrityChunk(
+  text: string
+): Promise<CognitiveIntegrityResult> {
+  const response = await getAICompletion({
+    systemPrompt: COGNITIVE_INTEGRITY_SYSTEM_PROMPT,
+    userPrompt: COGNITIVE_INTEGRITY_USER_PROMPT(text),
+    temperature: 0.7,
+    maxTokens: 4096,
+  });
+
+  const result = JSON.parse(response);
+  
+  return {
+    authenticity_commentary: result.authenticity_commentary || "Unable to assess authenticity",
+    reconstructed_passage: result.reconstructed_passage || text,
+    diagnostic_block: {
+      RealityAnchor: result.diagnostic_block?.RealityAnchor ?? 0.5,
+      CausalDepth: result.diagnostic_block?.CausalDepth ?? 0.5,
+      Friction: result.diagnostic_block?.Friction ?? 0.5,
+      Compression: result.diagnostic_block?.Compression ?? 0.5,
+      SimulationIndex: result.diagnostic_block?.SimulationIndex ?? 0.5,
+      LevelCoherence: result.diagnostic_block?.LevelCoherence ?? 0.5,
+      CompositeScore: result.diagnostic_block?.CompositeScore ?? 0.5,
+      IntegrityType: result.diagnostic_block?.IntegrityType || "Unknown",
+    },
+    interpretation_summary: result.interpretation_summary || "Unable to provide interpretation",
+  };
+}
+
+export async function processCognitiveIntegrity(
+  text: string
+): Promise<CognitiveIntegrityResult> {
+  const chunks = segmentText(text, 2000);
+  
+  if (chunks.length === 1) {
+    return processCognitiveIntegrityChunk(text);
+  }
+  
+  console.log(`Processing ${chunks.length} chunks for cognitive integrity analysis`);
+  
+  const chunkResults: CognitiveIntegrityResult[] = [];
+  for (let i = 0; i < chunks.length; i++) {
+    console.log(`Processing chunk ${i + 1}/${chunks.length}`);
+    const result = await processCognitiveIntegrityChunk(chunks[i]);
+    chunkResults.push(result);
+  }
+  
+  // Synthesize results from multiple chunks
+  // Aggregate commentary, stitch passages, average metrics
+  const allCommentaries = chunkResults.map((r, i) => `Chunk ${i + 1}: ${r.authenticity_commentary}`).join(' ');
+  const synthesizedPassage = chunkResults.map(r => r.reconstructed_passage).join('\n\n');
+  
+  // Average all numeric metrics
+  const avgRealityAnchor = chunkResults.reduce((sum, r) => sum + r.diagnostic_block.RealityAnchor, 0) / chunkResults.length;
+  const avgCausalDepth = chunkResults.reduce((sum, r) => sum + r.diagnostic_block.CausalDepth, 0) / chunkResults.length;
+  const avgFriction = chunkResults.reduce((sum, r) => sum + r.diagnostic_block.Friction, 0) / chunkResults.length;
+  const avgCompression = chunkResults.reduce((sum, r) => sum + r.diagnostic_block.Compression, 0) / chunkResults.length;
+  const avgSimulationIndex = chunkResults.reduce((sum, r) => sum + r.diagnostic_block.SimulationIndex, 0) / chunkResults.length;
+  const avgLevelCoherence = chunkResults.reduce((sum, r) => sum + r.diagnostic_block.LevelCoherence, 0) / chunkResults.length;
+  const avgCompositeScore = chunkResults.reduce((sum, r) => sum + r.diagnostic_block.CompositeScore, 0) / chunkResults.length;
+  
+  // Classify IntegrityType based on composite score range
+  let integrityType = "Multi-Chunk Analysis";
+  if (avgCompositeScore >= 0.80) {
+    integrityType = "High-Integrity Source (Synthesized)";
+  } else if (avgCompositeScore >= 0.50) {
+    integrityType = "Authentic Partial (Synthesized)";
+  } else {
+    integrityType = "Requires Conceptual Reconstruction (Synthesized)";
+  }
+  
+  const allInterpretations = chunkResults.map((r, i) => `Chunk ${i + 1}: ${r.interpretation_summary}`).join(' ');
+  
+  return {
+    authenticity_commentary: `Synthesized analysis from ${chunks.length} text chunks (${countWords(text)} words total). ${allCommentaries}`,
+    reconstructed_passage: synthesizedPassage,
+    diagnostic_block: {
+      RealityAnchor: avgRealityAnchor,
+      CausalDepth: avgCausalDepth,
+      Friction: avgFriction,
+      Compression: avgCompression,
+      SimulationIndex: avgSimulationIndex,
+      LevelCoherence: avgLevelCoherence,
+      CompositeScore: avgCompositeScore,
+      IntegrityType: integrityType,
+    },
+    interpretation_summary: `Multi-chunk synthesis: ${allInterpretations}`,
   };
 }

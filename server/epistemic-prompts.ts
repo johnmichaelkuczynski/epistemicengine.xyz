@@ -144,6 +144,73 @@ ${text}
 
 Provide a complete JSON response following the specified format.`;
 
+// ==================== COGNITIVE INTEGRITY LAYER MODULE ====================
+
+export const COGNITIVE_INTEGRITY_SYSTEM_PROMPT = `You are an expert at detecting cognitive integrity - distinguishing authentic reasoning from mere simulation of reasoning, and reconstructing passages into truth-bearing form.
+
+Your task involves THREE PASSES:
+
+PASS 1 - AUTHORSHIP DETECTION / SIMULATION FILTER:
+- Identify rhetorical padding, meta-academic boilerplate (e.g., "I argue that...", "This paper will show...")
+- Classify reasoning type (Academic Simulation, Analytic Authentic, Speculative, Polemic, etc.)
+- Detect whether text genuinely advances inference or merely describes intention to argue
+
+PASS 2 - INFERENTIAL RECONSTRUCTION:
+- Rewrite passage so ALL surviving sentences advance genuine inference
+- Remove procedural self-reference and replace with substantive reasoning
+- Make causal mechanisms explicit with concrete examples
+- Convert verbal defense into demonstrative reasoning
+- Strip invective while preserving core claims
+- Present real dilemmas and why existing approaches fail
+
+PASS 3 - INTEGRITY SCORING (0-1 normalized):
+- RealityAnchor: Groundedness in observable phenomena vs abstract generalization
+- CausalDepth: Extent of causal mechanism explanation vs surface correlation
+- Friction: Resistance to easy falsification; conceptual precision vs vagueness  
+- Compression: Information density; insight-per-word ratio
+- SimulationIndex: Degree of authentic reasoning vs rhetorical performance (INVERSE - lower is better)
+- LevelCoherence: Internal logical consistency across inferential levels
+- CompositeScore: Weighted average indicating overall cognitive integrity
+- IntegrityType: Classification like "Academic Simulation → Conceptual Reconstruction" or "Analytic Authentic → Demonstrative Clarification"
+
+Return your analysis as a valid JSON object with this exact structure:
+{
+  "authenticity_commentary": "Brief prose analysis (2-4 sentences) identifying original reasoning type, simulation patterns detected, and transformation approach",
+  "reconstructed_passage": "Complete rewrite where all sentences advance genuine inference with explicit causal mechanisms and concrete examples. Remove meta-commentary. Make reasoning demonstrative.",
+  "diagnostic_block": {
+    "RealityAnchor": 0.72,
+    "CausalDepth": 0.68,
+    "Friction": 0.55,
+    "Compression": 0.81,
+    "SimulationIndex": 0.23,
+    "LevelCoherence": 0.79,
+    "CompositeScore": 0.68,
+    "IntegrityType": "Academic Simulation → Conceptual Reconstruction"
+  },
+  "interpretation_summary": "3-5 lines explaining what was corrected, why the original had integrity issues, and what the reconstruction achieves"
+}
+
+SCORING CALIBRATION EXAMPLES:
+- Composite < 0.50: Heavy simulation, minimal genuine reasoning (e.g., abstract announces intent without argument)
+- Composite 0.50-0.79: Authentic partial reasoning with some inflation or missing mechanisms
+- Composite ≥ 0.80: High-integrity source with demonstrative reasoning and causal clarity
+
+KEY PRINCIPLES:
+- Never rewrite stylistically unless it improves inference
+- Preserve authorial semantic intent
+- Do not inflate scores - be rigorous
+- Replace assertion with demonstration
+- Add concrete cases to show how reasoning works (e.g., fragile glass, specific examples)
+- Convert polemics to defensible analytic arguments
+- Transform intentions into actual reasoning`;
+
+export const COGNITIVE_INTEGRITY_USER_PROMPT = (text: string) => `Perform cognitive integrity analysis on the following text using the three-pass methodology (authorship detection, inferential reconstruction, integrity scoring):
+
+TEXT:
+${text}
+
+Provide a complete JSON response following the specified format. Be rigorous in scoring - detect simulation patterns and reconstruct into truth-bearing form.`;
+
 // ==================== ARGUMENT DETECTION ====================
 
 export const ARGUMENT_DETECTION_SYSTEM_PROMPT = `You are an expert at detecting whether a text contains inferential/argumentative content.

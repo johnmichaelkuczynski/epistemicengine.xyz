@@ -1,5 +1,5 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Wrench, Map } from "lucide-react";
+import { FileText, Wrench, Map, Shield } from "lucide-react";
 import type { ModuleType } from "@shared/schema";
 
 interface ModuleSelectorProps {
@@ -10,7 +10,7 @@ interface ModuleSelectorProps {
 export function ModuleSelector({ selectedModule, onModuleChange }: ModuleSelectorProps) {
   return (
     <Tabs value={selectedModule} onValueChange={(value) => onModuleChange(value as ModuleType)} className="w-full">
-      <TabsList className="grid w-full grid-cols-3 h-auto">
+      <TabsList className="grid w-full grid-cols-4 h-auto">
         <TabsTrigger 
           value="epistemic-inference" 
           className="flex flex-col items-center gap-2 py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
@@ -42,6 +42,17 @@ export function ModuleSelector({ selectedModule, onModuleChange }: ModuleSelecto
           <div className="text-center">
             <div className="font-semibold text-sm">Knowledge-to-Utility</div>
             <div className="text-xs opacity-80 mt-0.5">Extract Value</div>
+          </div>
+        </TabsTrigger>
+        <TabsTrigger 
+          value="cognitive-integrity" 
+          className="flex flex-col items-center gap-2 py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          data-testid="tab-cognitive-integrity"
+        >
+          <Shield className="h-5 w-5" />
+          <div className="text-center">
+            <div className="font-semibold text-sm">Cognitive Integrity</div>
+            <div className="text-xs opacity-80 mt-0.5">Detect • Reconstruct • Score</div>
           </div>
         </TabsTrigger>
       </TabsList>

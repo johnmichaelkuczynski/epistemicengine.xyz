@@ -1,0 +1,118 @@
+Instruction for Replit Agent — Cognitive Integrity Layer (Truth vs Simulation Control)
+
+Purpose
+Implement a Cognitive Integrity Layer that detects whether a passage expresses real reasoning or merely simulates it, reconstructs the passage into a truth-bearing form, and emits quantitative diagnostics usable by downstream ZHI modules (Intelligence Meter, Inference Module, Living Book Generator, etc.).
+
+⚙️ CORE LOGIC
+
+For every input passage, perform three internal passes:
+
+Authorship Detection / Simulation Filter
+Identify rhetorical or meta-academic padding, remove “I argue that…” boilerplate, and classify reasoning type.
+
+Inferential Reconstruction
+Rewrite the passage so that all surviving sentences advance genuine inference, not procedure or self-reference.
+
+Integrity Scoring
+Output normalized 0–1 values for:
+
+RealityAnchor
+
+CausalDepth
+
+Friction
+
+Compression
+
+SimulationIndex
+
+LevelCoherence
+
+CompositeScore
+
+IntegrityType (e.g. “Academic Simulation → Conceptual Reconstruction”)
+
+🧠 OUTPUT FORMAT
+INTEGRITY-STAMPED RECONSTRUCTION
+  Authenticity Commentary:  brief prose
+  Integrity-Reconstructed Passage: rewritten text
+  Diagnostic Tag Block: JSON object of scores
+  Interpretation: 3–5 lines explaining corrections
+
+📘 WORKED EXAMPLES
+Example 1 – “Dispositions and Subjunctives” (qualified conditional)
+
+Detected: Analytic Authentic → Demonstrative Clarification
+
+Composite Score: 0.68
+
+Original Problem: asserted defense of a view without showing how it works.
+
+Reconstruction: added concrete cases – fragile glass, “finked” wire – to display reasoning.
+
+Takeaway: replaces verbal defense with causal modeling.
+
+Example 2 – Lewis and Modal Dependence Critique
+
+Detected: Analytic Authentic → Hyperassertive (Polemic-Compressed)
+
+Composite Score: 0.82
+
+Original Problem: true insight wrapped in attack language (“obviously wrong”).
+
+Reconstruction: preserves claim that modal talk tracks dependence in this world, drops invective, restores formal coherence.
+
+Use case: trains the layer to convert high-compression polemics into defensible analytic arguments.
+
+Example 3 – “Transcendental Empiricism” Abstract
+
+Detected: Academic Simulation → Conceptual Reconstruction
+
+Composite Score: 0.42
+
+Original Problem: meta-narrative of intentions, no reasoning.
+
+Reconstruction: presents real dilemma – how experience yields conceptual content – and why McDowell + Gaskin fail.
+
+Lesson: identifies “pseudo-intelligent” academic patterning and replaces with substantive causal analysis.
+
+Example 4 – Group Psychology vs Individual Psychology
+
+Detected: Analytic Authentic → Speculative Expansion (High Originality / Low Empirical Constraint)
+
+Composite Score: 0.88
+
+Original Problem: genuine insight but inflated generalization about human intelligence.
+
+Reconstruction: retains the biological analogy (cell ↔ person) and reframes claim as testable social-organism hypothesis.
+
+Lesson: keeps creative cognition while bounding ontological reach.
+
+🔁 INTEGRATION RULES
+Composite Score	Action
+< 0.50	Send to Conceptual Reconstruction Submodule for deep rewrite
+0.50 – 0.79	Mark as Authentic Partial; forward to Inference Module for supporting reasoning
+≥ 0.80	Store as High-Integrity Source in Epistemic Core Database
+⚡ FUNCTIONAL OUTPUT TYPE
+type IntegrityLayerOutput = {
+  authenticity_commentary: string,
+  reconstructed_passage: string,
+  diagnostic_block: object,
+  interpretation_summary: string
+}
+
+🔒 CONTROL CONSTRAINTS
+
+Never rewrite stylistically unless it improves inference.
+
+Preserve authorial semantic intent.
+
+Do not inflate scores.
+
+Always produce JSON + reconstruction + commentary.
+
+💡 SYSTEM ROLE SUMMARY
+
+The Cognitive Integrity Layer is the central verification organ of ZHI Systems.
+It classifies reasoning (simulation vs authentic), reconstructs arguments into truth-bearing form, and passes metrics to dependent modules.
+Use the four embedded examples—Dispositions, Lewis, Transcendental Empiricism, and Group Psychology—as reference baselines for calibration and self-testing.

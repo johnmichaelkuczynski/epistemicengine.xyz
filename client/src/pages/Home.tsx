@@ -10,8 +10,9 @@ import { TextInputArea } from "@/components/TextInputArea";
 import { EpistemicInferenceResults } from "@/components/EpistemicInferenceResults";
 import { JustificationBuilderResults } from "@/components/JustificationBuilderResults";
 import { KnowledgeUtilityResults } from "@/components/KnowledgeUtilityResults";
+import { CognitiveIntegrityResults } from "@/components/CognitiveIntegrityResults";
 import { apiRequest } from "@/lib/queryClient";
-import type { ModuleType, AnalyzeResponse, EpistemicInferenceResult, JustificationBuilderResult, KnowledgeUtilityResult } from "@shared/schema";
+import type { ModuleType, AnalyzeResponse, EpistemicInferenceResult, JustificationBuilderResult, KnowledgeUtilityResult, CognitiveIntegrityResult } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
@@ -101,9 +102,12 @@ export default function Home() {
       return <EpistemicInferenceResults result={data.result as EpistemicInferenceResult} />;
     } else if (selectedModule === "justification-builder") {
       return <JustificationBuilderResults result={data.result as JustificationBuilderResult} />;
-    } else {
+    } else if (selectedModule === "knowledge-utility-mapper") {
       return <KnowledgeUtilityResults result={data.result as KnowledgeUtilityResult} />;
+    } else if (selectedModule === "cognitive-integrity") {
+      return <CognitiveIntegrityResults result={data.result as CognitiveIntegrityResult} />;
     }
+    return null;
   };
 
   return (

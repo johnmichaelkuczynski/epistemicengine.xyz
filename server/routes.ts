@@ -7,6 +7,7 @@ import {
   processEpistemicInference,
   processJustificationBuilder,
   processKnowledgeUtility,
+  processCognitiveIntegrity,
 } from "./processing";
 import { storage } from "./storage";
 
@@ -67,6 +68,10 @@ export function registerRoutes(app: Express) {
         
         case "knowledge-utility-mapper":
           result = await processKnowledgeUtility(text);
+          break;
+        
+        case "cognitive-integrity":
+          result = await processCognitiveIntegrity(text);
           break;
         
         default:

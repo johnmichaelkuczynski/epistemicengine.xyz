@@ -40,7 +40,8 @@ export const insertAnalysisHistorySchema = createInsertSchema(analysisHistory).o
 export const moduleTypeSchema = z.enum([
   "epistemic-inference",
   "justification-builder", 
-  "knowledge-utility-mapper"
+  "knowledge-utility-mapper",
+  "cognitive-integrity"
 ]);
 
 export type ModuleType = z.infer<typeof moduleTypeSchema>;
@@ -141,6 +142,30 @@ export const knowledgeUtilityResultSchema = z.object({
 
 export type KnowledgeUtilityResult = z.infer<typeof knowledgeUtilityResultSchema>;
 
+// ==================== COGNITIVE INTEGRITY LAYER MODULE ====================
+
+export const diagnosticBlockSchema = z.object({
+  RealityAnchor: z.number().min(0).max(1),
+  CausalDepth: z.number().min(0).max(1),
+  Friction: z.number().min(0).max(1),
+  Compression: z.number().min(0).max(1),
+  SimulationIndex: z.number().min(0).max(1),
+  LevelCoherence: z.number().min(0).max(1),
+  CompositeScore: z.number().min(0).max(1),
+  IntegrityType: z.string(),
+});
+
+export type DiagnosticBlock = z.infer<typeof diagnosticBlockSchema>;
+
+export const cognitiveIntegrityResultSchema = z.object({
+  authenticity_commentary: z.string(),
+  reconstructed_passage: z.string(),
+  diagnostic_block: diagnosticBlockSchema,
+  interpretation_summary: z.string(),
+});
+
+export type CognitiveIntegrityResult = z.infer<typeof cognitiveIntegrityResultSchema>;
+
 // ==================== API REQUEST/RESPONSE SCHEMAS ====================
 
 export const analyzeRequestSchema = z.object({
@@ -159,6 +184,7 @@ export const analyzeResponseSchema = z.object({
     epistemicInferenceResultSchema,
     justificationBuilderResultSchema,
     knowledgeUtilityResultSchema,
+    cognitiveIntegrityResultSchema,
   ]).optional(),
   processingTime: z.number().optional(),
 });
