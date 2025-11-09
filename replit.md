@@ -31,27 +31,32 @@ Preferred communication style: Simple, everyday language.
 
 **Key Frontend Components**:
 - `ModuleSelector` - Tab-based module switching interface
-- `TextInputArea` - Word-counted input with 2,000-word limit validation
+- `TextInputArea` - Word-counted input with 10,000-word limit validation (automatic chunking for texts >2,000 words)
 - Module-specific result components (`EpistemicInferenceResults`, `JustificationBuilderResults`, `KnowledgeUtilityResults`)
 - `CoherenceScore` - Visual progress indicator for epistemic metrics
 - **TXT Export** - Each module includes a download button that exports complete analysis results as formatted plain text files
+- **History Page** - Complete analysis history dashboard with filtering, sorting, viewing, downloading, and deletion capabilities
 
 ### Backend Architecture
 
 **Framework**: Express.js with TypeScript on Node.js
 
 **Request Processing Flow**:
-1. Input validation using Zod schemas (2,000-word limit enforcement)
+1. Input validation using Zod schemas (10,000-word limit enforcement)
 2. Argument detection pre-processing (filters non-argumentative text)
-3. Module-specific AI processing via provider abstraction
-4. Structured JSON response with typed schemas
+3. Automatic text chunking for inputs >2,000 words (paragraph-aware segmentation)
+4. Module-specific AI processing via provider abstraction
+5. Result synthesis for chunked analyses
+6. Database persistence of analysis results
+7. Structured JSON response with typed schemas
 
 **Module Processing Functions** (`server/processing.ts`):
 - `detectArgument()` - Pre-filters text to ensure argumentative content exists
-- `processEpistemicInference()` - Three-layer analysis (structure → judgment → rewrite)
-- `processJustificationBuilder()` - Gap analysis and chain reconstruction
-- `processKnowledgeUtility()` - Utility classification and ranking
-- Text segmentation utilities for handling near-limit inputs
+- `segmentText()` - Intelligently splits text by paragraphs (with sentence fallback) for chunking
+- `processEpistemicInference()` - Three-layer analysis (structure → judgment → rewrite) with automatic chunking
+- `processJustificationBuilder()` - Gap analysis and chain reconstruction with automatic chunking
+- `processKnowledgeUtility()` - Utility classification and ranking with automatic chunking
+- Result synthesis utilities for aggregating multi-chunk analyses
 
 **Prompt Engineering Strategy**: Each module has dedicated system/user prompt templates in `server/epistemic-prompts.ts` with explicit JSON schema instructions for AI responses. Prompts enforce structured output matching shared TypeScript schemas.
 
@@ -72,16 +77,21 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Storage Architecture
 
-**Current State**: In-memory storage (`MemStorage` class) for user management
-- Simple Map-based persistence suitable for development/demonstration
-- User schema defined with Drizzle ORM schemas in `shared/schema.ts`
+**Active Database**: PostgreSQL (Neon serverless) with Drizzle ORM
+- **Users**: In-memory storage (`MemStorage` class) for user management
+- **Analysis History**: PostgreSQL database persistence for all completed analyses
+  - Table: `analysis_history` with columns: id (UUID), userId, moduleType, inputText, wordCount (integer), result (JSONB), processingTime (integer), createdAt
+  - Indexes on userId, moduleType, and createdAt for efficient querying
+  - Full CRUD operations: saveAnalysis, getAnalysisHistory, getAnalysisById, deleteAnalysis
+  - Automatic saving after each successful analysis
 
-**Database Configuration**: PostgreSQL schema prepared via Drizzle ORM
-- Database URL configured for Neon serverless Postgres (`@neondatabase/serverless`)
-- Migration system ready (`drizzle-kit`) but storage not yet actively used for analysis results
-- **Note**: While Drizzle is configured for PostgreSQL, the active storage layer is currently in-memory only
+**API Endpoints**:
+- `POST /api/analyze` - Processes text and automatically saves results to database
+- `GET /api/history` - Retrieves analysis history with optional limit parameter
+- `GET /api/history/:id` - Retrieves specific analysis by ID
+- `DELETE /api/history/:id` - Deletes analysis from database
 
-**Future Expansion Path**: Analysis results, user sessions, and historical queries can be persisted to PostgreSQL when needed
+**Database Tools**: Migration system using `drizzle-kit` with `npm run db:push` for schema updates
 
 ### Schema & Type System
 
