@@ -9,9 +9,10 @@ interface TextInputAreaProps {
   maxWords?: number;
 }
 
-export function TextInputArea({ value, onChange, wordCount, maxWords = 2000 }: TextInputAreaProps) {
+export function TextInputArea({ value, onChange, wordCount, maxWords = 10000 }: TextInputAreaProps) {
   const isNearLimit = wordCount > maxWords * 0.9;
   const isOverLimit = wordCount > maxWords;
+  const requiresChunking = wordCount > 2000 && !isOverLimit;
 
   return (
     <div className="space-y-2">
@@ -37,12 +38,21 @@ export function TextInputArea({ value, onChange, wordCount, maxWords = 2000 }: T
         <div className="flex items-start gap-2 text-sm text-destructive" data-testid="text-overlength-warning">
           <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
           <p>
-            Text exceeds the {maxWords}-word limit. The system will refuse processing or automatically chunk the input.
+            Text exceeds the {maxWords}-word limit. Please shorten your input.
           </p>
         </div>
       )}
       
-      {isNearLimit && !isOverLimit && (
+      {requiresChunking && (
+        <div className="flex items-start gap-2 text-sm text-blue-600 dark:text-blue-400">
+          <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+          <p>
+            Text will be automatically processed in chunks for optimal analysis (over 2,000 words)
+          </p>
+        </div>
+      )}
+      
+      {isNearLimit && !isOverLimit && !requiresChunking && (
         <div className="flex items-start gap-2 text-sm text-muted-foreground">
           <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
           <p>Approaching word limit ({Math.round((wordCount / maxWords) * 100)}% used)</p>

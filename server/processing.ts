@@ -22,34 +22,70 @@ export function countWords(text: string): number {
 }
 
 export function segmentText(text: string, maxWords: number = 2000): string[] {
-  const words = text.trim().split(/\s+/);
-  if (words.length <= maxWords) {
+  const totalWords = countWords(text);
+  if (totalWords <= maxWords) {
     return [text];
   }
 
+  console.log(`Text exceeds ${maxWords} words (${totalWords} total). Chunking into segments...`);
+
   const segments: string[] = [];
-  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  // Split by paragraphs first (double newlines or single newlines)
+  const paragraphs = text.split(/\n\n+|\n/).filter(p => p.trim().length > 0);
   
   let currentSegment: string[] = [];
   let currentWordCount = 0;
 
-  for (const sentence of sentences) {
-    const sentenceWords = sentence.trim().split(/\s+/).length;
+  for (const paragraph of paragraphs) {
+    const paragraphWords = countWords(paragraph);
     
-    if (currentWordCount + sentenceWords > maxWords && currentSegment.length > 0) {
-      segments.push(currentSegment.join('. ') + '.');
-      currentSegment = [sentence.trim()];
-      currentWordCount = sentenceWords;
+    // If a single paragraph exceeds max, split it by sentences
+    if (paragraphWords > maxWords) {
+      if (currentSegment.length > 0) {
+        segments.push(currentSegment.join('\n\n'));
+        currentSegment = [];
+        currentWordCount = 0;
+      }
+      
+      // Split large paragraph by sentences
+      const sentences = paragraph.split(/[.!?]+/).filter(s => s.trim().length > 0);
+      let sentenceBuffer: string[] = [];
+      let sentenceWordCount = 0;
+      
+      for (const sentence of sentences) {
+        const sentenceWords = countWords(sentence);
+        if (sentenceWordCount + sentenceWords > maxWords && sentenceBuffer.length > 0) {
+          segments.push(sentenceBuffer.join('. ') + '.');
+          sentenceBuffer = [sentence.trim()];
+          sentenceWordCount = sentenceWords;
+        } else {
+          sentenceBuffer.push(sentence.trim());
+          sentenceWordCount += sentenceWords;
+        }
+      }
+      
+      if (sentenceBuffer.length > 0) {
+        segments.push(sentenceBuffer.join('. ') + '.');
+      }
+      continue;
+    }
+    
+    // Check if adding this paragraph would exceed the limit
+    if (currentWordCount + paragraphWords > maxWords && currentSegment.length > 0) {
+      segments.push(currentSegment.join('\n\n'));
+      currentSegment = [paragraph.trim()];
+      currentWordCount = paragraphWords;
     } else {
-      currentSegment.push(sentence.trim());
-      currentWordCount += sentenceWords;
+      currentSegment.push(paragraph.trim());
+      currentWordCount += paragraphWords;
     }
   }
 
   if (currentSegment.length > 0) {
-    segments.push(currentSegment.join('. ') + '.');
+    segments.push(currentSegment.join('\n\n'));
   }
 
+  console.log(`Created ${segments.length} segments from ${totalWords} words`);
   return segments;
 }
 
@@ -101,7 +137,7 @@ export async function detectArgument(text: string): Promise<ArgumentDetectionRes
 
 // ==================== EPISTEMIC INFERENCE MODULE ====================
 
-export async function processEpistemicInference(
+async function processEpistemicInferenceChunk(
   text: string
 ): Promise<EpistemicInferenceResult> {
   const response = await getAICompletion({
@@ -129,9 +165,50 @@ export async function processEpistemicInference(
   };
 }
 
+export async function processEpistemicInference(
+  text: string
+): Promise<EpistemicInferenceResult> {
+  const chunks = segmentText(text, 2000);
+  
+  if (chunks.length === 1) {
+    return processEpistemicInferenceChunk(text);
+  }
+  
+  console.log(`Processing ${chunks.length} chunks for epistemic inference`);
+  
+  // Process each chunk
+  const chunkResults: EpistemicInferenceResult[] = [];
+  for (let i = 0; i < chunks.length; i++) {
+    console.log(`Processing chunk ${i + 1}/${chunks.length}`);
+    const result = await processEpistemicInferenceChunk(chunks[i]);
+    chunkResults.push(result);
+  }
+  
+  // Synthesize results
+  const allArguments = chunkResults.flatMap(r => r.arguments);
+  const avgCoherence = chunkResults.reduce((sum, r) => sum + r.overallCoherence, 0) / chunkResults.length;
+  const allIssues = chunkResults.flatMap(r => r.judgment.issues);
+  
+  const synthesizedRewrite = chunkResults.map(r => r.rewrittenText).join('\n\n');
+  
+  return {
+    arguments: allArguments,
+    judgment: {
+      coherenceScore: avgCoherence,
+      reasoningType: chunkResults[0].judgment.reasoningType,
+      logicalSoundness: `Synthesized from ${chunks.length} chunks. Overall: ${avgCoherence > 0.7 ? 'Sound' : avgCoherence > 0.5 ? 'Moderate' : 'Weak'}`,
+      conceptualCompleteness: `Analysis across ${chunks.length} text segments`,
+      issues: allIssues,
+    },
+    rewrittenText: synthesizedRewrite,
+    overallCoherence: avgCoherence,
+    metaJudgment: `This analysis synthesizes results from ${chunks.length} text chunks (${countWords(text)} words total). Individual chunk coherence scores averaged to produce the overall assessment.`,
+  };
+}
+
 // ==================== JUSTIFICATION BUILDER MODULE ====================
 
-export async function processJustificationBuilder(
+async function processJustificationBuilderChunk(
   text: string
 ): Promise<JustificationBuilderResult> {
   const response = await getAICompletion({
@@ -153,9 +230,43 @@ export async function processJustificationBuilder(
   };
 }
 
+export async function processJustificationBuilder(
+  text: string
+): Promise<JustificationBuilderResult> {
+  const chunks = segmentText(text, 2000);
+  
+  if (chunks.length === 1) {
+    return processJustificationBuilderChunk(text);
+  }
+  
+  console.log(`Processing ${chunks.length} chunks for justification builder`);
+  
+  const chunkResults: JustificationBuilderResult[] = [];
+  for (let i = 0; i < chunks.length; i++) {
+    console.log(`Processing chunk ${i + 1}/${chunks.length}`);
+    const result = await processJustificationBuilderChunk(chunks[i]);
+    chunkResults.push(result);
+  }
+  
+  const allClaims = chunkResults.flatMap(r => r.detectedClaims);
+  const allChains = chunkResults.flatMap(r => r.justificationChains);
+  const allWeaknesses = chunkResults.flatMap(r => r.weaknesses);
+  const avgCoherence = chunkResults.reduce((sum, r) => sum + r.coherenceScore, 0) / chunkResults.length;
+  const synthesizedRewrite = chunkResults.map(r => r.rewrittenText).join('\n\n');
+  
+  return {
+    detectedClaims: allClaims,
+    justificationChains: allChains,
+    coherenceScore: avgCoherence,
+    completeness: `Analyzed across ${chunks.length} text segments. Overall assessment: ${avgCoherence > 0.7 ? 'Complete' : avgCoherence > 0.5 ? 'Moderately complete' : 'Incomplete'}`,
+    weaknesses: allWeaknesses,
+    rewrittenText: synthesizedRewrite,
+  };
+}
+
 // ==================== KNOWLEDGE-TO-UTILITY MAPPER MODULE ====================
 
-export async function processKnowledgeUtility(
+async function processKnowledgeUtilityChunk(
   text: string
 ): Promise<KnowledgeUtilityResult> {
   const response = await getAICompletion({
@@ -178,5 +289,43 @@ export async function processKnowledgeUtility(
       transformativePotential: result.judgmentReport?.transformativePotential || "Unable to assess",
     },
     utilityRank: result.utilityRank ?? 5,
+  };
+}
+
+export async function processKnowledgeUtility(
+  text: string
+): Promise<KnowledgeUtilityResult> {
+  const chunks = segmentText(text, 2000);
+  
+  if (chunks.length === 1) {
+    return processKnowledgeUtilityChunk(text);
+  }
+  
+  console.log(`Processing ${chunks.length} chunks for knowledge utility mapper`);
+  
+  const chunkResults: KnowledgeUtilityResult[] = [];
+  for (let i = 0; i < chunks.length; i++) {
+    console.log(`Processing chunk ${i + 1}/${chunks.length}`);
+    const result = await processKnowledgeUtilityChunk(chunks[i]);
+    chunkResults.push(result);
+  }
+  
+  const allKnowledge = chunkResults.flatMap(r => r.operativeKnowledge);
+  const allMappings = chunkResults.flatMap(r => r.utilityMappings);
+  const allLimitations = chunkResults.flatMap(r => r.judgmentReport.limitations);
+  const avgUtilityRank = chunkResults.reduce((sum, r) => sum + r.utilityRank, 0) / chunkResults.length;
+  const synthesizedRewrite = chunkResults.map(r => r.utilityAugmentedRewrite).join('\n\n');
+  
+  return {
+    operativeKnowledge: allKnowledge,
+    utilityMappings: allMappings,
+    utilityAugmentedRewrite: synthesizedRewrite,
+    judgmentReport: {
+      breadth: `Synthesized from ${chunks.length} text segments`,
+      depth: chunkResults[0].judgmentReport.depth,
+      limitations: allLimitations,
+      transformativePotential: `Analysis across ${chunks.length} chunks reveals ${avgUtilityRank > 7 ? 'high' : avgUtilityRank > 5 ? 'moderate' : 'limited'} transformative potential`,
+    },
+    utilityRank: avgUtilityRank,
   };
 }

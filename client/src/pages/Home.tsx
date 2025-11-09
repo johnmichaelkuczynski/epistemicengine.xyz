@@ -68,13 +68,20 @@ export default function Home() {
       return;
     }
 
-    if (wordCount > 2000) {
+    if (wordCount > 10000) {
       toast({
         variant: "destructive",
         title: "Text Too Long",
-        description: "Please limit your input to 2,000 words or less",
+        description: "Please limit your input to 10,000 words or less",
       });
       return;
+    }
+    
+    if (wordCount > 2000) {
+      toast({
+        title: "Long Text Detected",
+        description: "Your text will be automatically split into chunks for processing",
+      });
     }
 
     analyzeMutation.mutate({ text: inputText, moduleType: selectedModule });
@@ -139,7 +146,7 @@ export default function Home() {
               value={inputText}
               onChange={setInputText}
               wordCount={wordCount}
-              maxWords={2000}
+              maxWords={10000}
             />
 
             <div className="mt-6 flex items-center justify-between">
@@ -150,7 +157,7 @@ export default function Home() {
               </div>
               <Button
                 onClick={handleAnalyze}
-                disabled={analyzeMutation.isPending || !inputText.trim() || wordCount > 2000}
+                disabled={analyzeMutation.isPending || !inputText.trim() || wordCount > 10000}
                 size="lg"
                 data-testid="button-analyze"
               >
@@ -194,8 +201,8 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t mt-16">
         <div className="max-w-7xl mx-auto px-6 py-6 text-center text-sm text-muted-foreground">
-          <p>Powered by Anthropic Claude (primary) with OpenAI fallback</p>
-          <p className="mt-1">Maximum input: 2,000 words per analysis</p>
+          <p>Powered by Anthropic Claude (primary) with OpenAI and DeepSeek fallback</p>
+          <p className="mt-1">Maximum input: 10,000 words with automatic chunking for longer texts</p>
         </div>
       </footer>
     </div>
