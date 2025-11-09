@@ -16,9 +16,11 @@ interface ReferenceTextSelectorProps {
 export function ReferenceTextSelector({ selectedIds, onSelectionChange }: ReferenceTextSelectorProps) {
   const [isOpen, setIsOpen] = useState(true);
 
-  const { data: analyses, isLoading } = useQuery<AnalysisHistoryRecord[]>({
+  const { data: response, isLoading } = useQuery<{ success: boolean; history: AnalysisHistoryRecord[] }>({
     queryKey: ["/api/history"],
   });
+
+  const analyses = response?.history || [];
 
   const toggleSelection = (id: string) => {
     if (selectedIds.includes(id)) {
@@ -29,16 +31,14 @@ export function ReferenceTextSelector({ selectedIds, onSelectionChange }: Refere
   };
 
   const selectAll = () => {
-    if (analyses) {
-      onSelectionChange(analyses.map(a => a.id));
-    }
+    onSelectionChange(analyses.map(a => a.id));
   };
 
   const clearAll = () => {
     onSelectionChange([]);
   };
 
-  const texts = analyses || [];
+  const texts = analyses;
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} data-testid="collapsible-reference-texts">
