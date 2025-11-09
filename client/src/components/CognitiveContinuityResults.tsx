@@ -38,11 +38,9 @@ export function CognitiveContinuityResults({ result }: CognitiveContinuityResult
       text += "No conflicts detected.\n\n";
     } else {
       result.conflict_nodes.forEach((node, idx) => {
-        text += `Conflict ${idx + 1}:\n`;
-        text += `  Type: ${node.conflict_type}\n`;
-        text += `  Severity: ${node.severity}\n`;
-        text += `  Description: ${node.description}\n\n`;
+        text += `${idx + 1}. ${node}\n`;
       });
+      text += "\n";
     }
     
     text += "\n" + "=".repeat(70) + "\n";
@@ -195,22 +193,12 @@ export function CognitiveContinuityResults({ result }: CognitiveContinuityResult
               No conflicts detected
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {result.conflict_nodes.map((node, idx) => (
-                <div key={idx} className="space-y-2 p-4 bg-muted rounded-lg" data-testid={`conflict-node-${idx}`}>
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" data-testid={`badge-conflict-type-${idx}`}>{node.conflict_type}</Badge>
-                      <Badge 
-                        variant={node.severity === "high" ? "destructive" : node.severity === "medium" ? "default" : "secondary"}
-                        data-testid={`badge-conflict-severity-${idx}`}
-                      >
-                        {node.severity}
-                      </Badge>
-                    </div>
-                  </div>
-                  <p className="text-sm leading-relaxed" data-testid={`text-conflict-description-${idx}`}>
-                    {node.description}
+                <div key={idx} className="flex gap-3 p-3 bg-muted rounded-md" data-testid={`conflict-node-${idx}`}>
+                  <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm leading-relaxed" data-testid={`text-conflict-${idx}`}>
+                    {node}
                   </p>
                 </div>
               ))}

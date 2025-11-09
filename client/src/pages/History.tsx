@@ -53,6 +53,7 @@ export default function History() {
       case "justification-builder": return "Justification Builder";
       case "knowledge-utility-mapper": return "Knowledge-to-Utility Mapper";
       case "cognitive-integrity": return "Cognitive Integrity";
+      case "cognitive-continuity": return "Cognitive Continuity";
       default: return type;
     }
   };
@@ -63,6 +64,7 @@ export default function History() {
       case "justification-builder": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
       case "knowledge-utility-mapper": return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
       case "cognitive-integrity": return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
+      case "cognitive-continuity": return "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200";
       default: return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
     }
   };
@@ -117,6 +119,7 @@ export default function History() {
                 <SelectItem value="justification-builder">Justification Builder</SelectItem>
                 <SelectItem value="knowledge-utility-mapper">Knowledge-to-Utility Mapper</SelectItem>
                 <SelectItem value="cognitive-integrity">Cognitive Integrity</SelectItem>
+                <SelectItem value="cognitive-continuity">Cognitive Continuity</SelectItem>
               </SelectContent>
             </Select>
 

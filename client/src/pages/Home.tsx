@@ -11,8 +11,9 @@ import { EpistemicInferenceResults } from "@/components/EpistemicInferenceResult
 import { JustificationBuilderResults } from "@/components/JustificationBuilderResults";
 import { KnowledgeUtilityResults } from "@/components/KnowledgeUtilityResults";
 import { CognitiveIntegrityResults } from "@/components/CognitiveIntegrityResults";
+import { CognitiveContinuityResults } from "@/components/CognitiveContinuityResults";
 import { apiRequest } from "@/lib/queryClient";
-import type { ModuleType, AnalyzeResponse, EpistemicInferenceResult, JustificationBuilderResult, KnowledgeUtilityResult, CognitiveIntegrityResult } from "@shared/schema";
+import type { ModuleType, AnalyzeResponse, EpistemicInferenceResult, JustificationBuilderResult, KnowledgeUtilityResult, CognitiveIntegrityResult, CognitiveContinuityResult } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
@@ -111,6 +112,8 @@ export default function Home() {
       return <KnowledgeUtilityResults result={data.result as KnowledgeUtilityResult} />;
     } else if (selectedModule === "cognitive-integrity") {
       return <CognitiveIntegrityResults result={data.result as CognitiveIntegrityResult} />;
+    } else if (selectedModule === "cognitive-continuity") {
+      return <CognitiveContinuityResults result={data.result as CognitiveContinuityResult} />;
     }
     return null;
   };
@@ -173,6 +176,7 @@ export default function Home() {
                 {selectedModule === "justification-builder" && "Reconstructs missing premises and inferential links"}
                 {selectedModule === "knowledge-utility-mapper" && "Extracts practical value and utility from theoretical claims"}
                 {selectedModule === "cognitive-integrity" && "Detects authentic reasoning and provides diagnostic integrity metrics"}
+                {selectedModule === "cognitive-continuity" && "Maps coherence across passages and detects contradictions in knowledge corpus"}
               </div>
               <div className="flex gap-2">
                 <Button
