@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp, FileText } from "lucide-react";
-import type { StoredText } from "@shared/schema";
+import type { AnalysisHistoryRecord } from "@shared/schema";
 
 interface ReferenceTextSelectorProps {
   selectedIds: string[];
@@ -14,10 +14,10 @@ interface ReferenceTextSelectorProps {
 }
 
 export function ReferenceTextSelector({ selectedIds, onSelectionChange }: ReferenceTextSelectorProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
-  const { data: storedTexts, isLoading } = useQuery<{ success: boolean; texts: StoredText[] }>({
-    queryKey: ["/api/stored-texts"],
+  const { data: analyses, isLoading } = useQuery<AnalysisHistoryRecord[]>({
+    queryKey: ["/api/history"],
   });
 
   const toggleSelection = (id: string) => {
@@ -29,8 +29,8 @@ export function ReferenceTextSelector({ selectedIds, onSelectionChange }: Refere
   };
 
   const selectAll = () => {
-    if (storedTexts?.texts) {
-      onSelectionChange(storedTexts.texts.map(t => t.id));
+    if (analyses) {
+      onSelectionChange(analyses.map(a => a.id));
     }
   };
 
@@ -38,7 +38,7 @@ export function ReferenceTextSelector({ selectedIds, onSelectionChange }: Refere
     onSelectionChange([]);
   };
 
-  const texts = storedTexts?.texts || [];
+  const texts = analyses || [];
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} data-testid="collapsible-reference-texts">
@@ -56,7 +56,7 @@ export function ReferenceTextSelector({ selectedIds, onSelectionChange }: Refere
               {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
             <CardDescription>
-              Select which previously stored texts to compare against for continuity analysis
+              Select which previously analyzed texts to compare against for continuity analysis
             </CardDescription>
           </CardHeader>
         </CollapsibleTrigger>
@@ -64,12 +64,12 @@ export function ReferenceTextSelector({ selectedIds, onSelectionChange }: Refere
         <CollapsibleContent>
           <CardContent>
             {isLoading && (
-              <p className="text-sm text-muted-foreground">Loading stored texts...</p>
+              <p className="text-sm text-muted-foreground">Loading your analyzed texts...</p>
             )}
             
             {!isLoading && texts.length === 0 && (
               <p className="text-sm text-muted-foreground">
-                No stored texts yet. Analyze some texts with other modules to build your library.
+                No analyzed texts yet. Analyze some texts with other modules to build your reference library.
               </p>
             )}
             
@@ -82,12 +82,13 @@ export function ReferenceTextSelector({ selectedIds, onSelectionChange }: Refere
                     onClick={selectAll}
                     data-testid="button-select-all"
                   >
-                    Select All
+                    Select All ({texts.length})
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={clearAll}
+                    disabled={selectedIds.length === 0}
                     data-testid="button-clear-all"
                   >
                     Clear All
@@ -95,29 +96,31 @@ export function ReferenceTextSelector({ selectedIds, onSelectionChange }: Refere
                 </div>
                 
                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {texts.map((text) => (
+                  {texts.map((analysis) => (
                     <div
-                      key={text.id}
+                      key={analysis.id}
                       className="flex items-start gap-3 p-3 border rounded-md hover-elevate"
-                      data-testid={`reference-text-${text.id}`}
+                      data-testid={`reference-text-${analysis.id}`}
                     >
                       <Checkbox
-                        checked={selectedIds.includes(text.id)}
-                        onCheckedChange={() => toggleSelection(text.id)}
-                        data-testid={`checkbox-reference-${text.id}`}
+                        checked={selectedIds.includes(analysis.id)}
+                        onCheckedChange={() => toggleSelection(analysis.id)}
+                        data-testid={`checkbox-reference-${analysis.id}`}
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium text-sm truncate">{text.title}</h4>
-                          <Badge variant="outline" className="text-xs">
-                            {text.wordCount} words
+                          <Badge variant="outline" className="text-xs shrink-0">
+                            {analysis.moduleType}
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs shrink-0">
+                            {analysis.wordCount} words
                           </Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {text.text.substring(0, 120)}...
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {analysis.inputText.substring(0, 150)}...
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(text.createdAt).toLocaleDateString()}
+                          {new Date(analysis.createdAt).toLocaleDateString()} at {new Date(analysis.createdAt).toLocaleTimeString()}
                         </p>
                       </div>
                     </div>
