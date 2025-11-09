@@ -2,12 +2,13 @@
 
 ## Overview
 
-The Epistemic Reasoning Engine is a specialized web application for analyzing philosophical and scientific argumentative text using AI-powered epistemic analysis. The application provides four distinct analytical modules:
+The Epistemic Reasoning Engine is a specialized web application for analyzing philosophical and scientific argumentative text using AI-powered epistemic analysis. The application provides five distinct analytical modules:
 
 1. **Epistemic Inference Module** - Analyzes justificatory structure, judges logical coherence, and rewrites text with explicit inferential steps
 2. **Justification Builder Module** - Identifies underdeveloped claims and reconstructs missing justificatory chains
 3. **Knowledge-to-Utility Mapper** - Extracts and maps the practical utility of knowledge claims
 4. **Cognitive Integrity Layer** - Detects authentic reasoning vs simulation and provides 8 quantitative diagnostic metrics (RealityAnchor, CausalDepth, Friction, Compression, SimulationIndex, LevelCoherence, CompositeScore, IntegrityType)
+5. **Cognitive Continuity Layer** - Maintains truth coherence across epistemic corpus by detecting contradictions, generating coherence maps, and producing continuity-aligned rewrites with 6 diagnostic metrics (CrossPhaseCoherence, TemporalStability, ProgressiveIntegration, ErrorPropagationIndex, SystemicCompression, ContinuityComposite)
 
 The system is designed for scholars, researchers, and students working with complex argumentative texts, providing professional-grade analysis with a focus on clarity, precision, and epistemic rigor.
 
@@ -31,9 +32,9 @@ Preferred communication style: Simple, everyday language.
 **Design Philosophy**: Material Design / Academic Research Tool pattern prioritizing maximum readability, clear visual hierarchy, and minimal distractions. Content-first approach with information-dense layouts suitable for long-form philosophical text analysis.
 
 **Key Frontend Components**:
-- `ModuleSelector` - Tab-based module switching interface (4-tab layout with Shield icon for Cognitive Integrity)
+- `ModuleSelector` - Tab-based module switching interface (5-tab layout with Shield icon for Cognitive Integrity and GitBranch icon for Cognitive Continuity)
 - `TextInputArea` - Word-counted input with 10,000-word limit validation (automatic chunking for texts >2,000 words)
-- Module-specific result components (`EpistemicInferenceResults`, `JustificationBuilderResults`, `KnowledgeUtilityResults`, `CognitiveIntegrityResults`)
+- Module-specific result components (`EpistemicInferenceResults`, `JustificationBuilderResults`, `KnowledgeUtilityResults`, `CognitiveIntegrityResults`, `CognitiveContinuityResults`)
 - `CoherenceScore` - Visual progress indicator for epistemic metrics
 - **TXT Export** - Each module includes a download button that exports complete analysis results as formatted plain text files
 - **History Page** - Complete analysis history dashboard with filtering, sorting, viewing, downloading, and deletion capabilities
@@ -58,6 +59,7 @@ Preferred communication style: Simple, everyday language.
 - `processJustificationBuilder()` - Gap analysis and chain reconstruction with automatic chunking
 - `processKnowledgeUtility()` - Utility classification and ranking with automatic chunking
 - `processCognitiveIntegrity()` - Three-pass authenticity analysis (detection → reconstruction → scoring) with automatic chunking and metric synthesis
+- `processCognitiveContinuity()` - Three-pass coherence analysis (mapping → diagnostics → rewrite) with automatic chunking and conflict detection
 - Result synthesis utilities for aggregating multi-chunk analyses
 
 **Prompt Engineering Strategy**: Each module has dedicated system/user prompt templates in `server/epistemic-prompts.ts` with explicit JSON schema instructions for AI responses. Prompts enforce structured output matching shared TypeScript schemas.
