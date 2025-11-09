@@ -19,6 +19,7 @@ import type {
   CognitiveContinuityResult,
 } from "@shared/schema";
 import { storage } from "./storage";
+import OpenAI from "openai";
 
 // ==================== UTILITIES ====================
 
@@ -429,18 +430,181 @@ export async function processCognitiveIntegrity(
 
 // ==================== COGNITIVE CONTINUITY LAYER ====================
 
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+async function getEmbedding(text: string): Promise<number[]> {
+  const response = await openai.embeddings.create({
+    model: "text-embedding-3-small",
+    input: text.substring(0, 8000), // Limit to ~8k chars for embedding
+  });
+  return response.data[0].embedding;
+}
+
+function cosineSimilarity(vecA: number[], vecB: number[]): number {
+  let dotProduct = 0;
+  let magnitudeA = 0;
+  let magnitudeB = 0;
+  
+  for (let i = 0; i < vecA.length; i++) {
+    dotProduct += vecA[i] * vecB[i];
+    magnitudeA += vecA[i] * vecA[i];
+    magnitudeB += vecB[i] * vecB[i];
+  }
+  
+  magnitudeA = Math.sqrt(magnitudeA);
+  magnitudeB = Math.sqrt(magnitudeB);
+  
+  if (magnitudeA === 0 || magnitudeB === 0) return 0;
+  
+  return dotProduct / (magnitudeA * magnitudeB);
+}
+
 export async function processCognitiveContinuity(
   text: string,
   referenceIds: string[] = [],
   alignRewrite: boolean = false
 ): Promise<CognitiveContinuityResult> {
-  // Minimal stub - proper implementation coming
+  console.log(`Processing continuity check with ${referenceIds.length} reference texts`);
+  
+  if (referenceIds.length === 0) {
+    return {
+      target: "New Text",
+      referenceSet: [],
+      compositeScore: 0.5,
+      pairwise: {},
+      alignmentSummary: ["No reference texts selected. Please select at least one reference text to compare against."],
+      continuityRewrite: undefined,
+    };
+  }
+
+  // Load reference texts from database
+  const referenceTexts = await Promise.all(
+    referenceIds.map(id => storage.getAnalysisById(id))
+  );
+  
+  const validReferences = referenceTexts.filter(ref => ref !== null);
+  
+  if (validReferences.length === 0) {
+    return {
+      target: "New Text",
+      referenceSet: [],
+      compositeScore: 0.5,
+      pairwise: {},
+      alignmentSummary: ["Selected reference texts could not be loaded from database."],
+      continuityRewrite: undefined,
+    };
+  }
+
+  // Get embedding for target text
+  console.log("Generating embedding for target text...");
+  const targetEmbedding = await getEmbedding(text);
+
+  // Get embeddings for all reference texts and compute similarities
+  console.log(`Generating embeddings for ${validReferences.length} reference texts...`);
+  const pairwiseScores: Record<string, number> = {};
+  const referenceNames: string[] = [];
+  
+  for (const ref of validReferences) {
+    if (!ref) continue;
+    
+    const refEmbedding = await getEmbedding(ref.inputText);
+    const similarity = cosineSimilarity(targetEmbedding, refEmbedding);
+    
+    // Create a short identifier for the reference
+    const refName = `${ref.moduleType} (${new Date(ref.createdAt).toLocaleDateString()}, ${ref.wordCount}w)`;
+    pairwiseScores[refName] = similarity;
+    referenceNames.push(refName);
+  }
+
+  // Calculate composite score (average of all pairwise scores)
+  const scores = Object.values(pairwiseScores);
+  const compositeScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+
+  // Generate AI-powered alignment summary
+  console.log("Generating alignment summary...");
+  const summaryContext = `
+TARGET TEXT (${countWords(text)} words):
+${text.substring(0, 1000)}${text.length > 1000 ? '...' : ''}
+
+REFERENCE TEXTS:
+${validReferences.map((ref, i) => `
+Reference ${i + 1} - ${referenceNames[i]} - Similarity: ${pairwiseScores[referenceNames[i]].toFixed(3)}
+${ref!.inputText.substring(0, 500)}${ref!.inputText.length > 500 ? '...' : ''}
+`).join('\n')}
+
+PAIRWISE SIMILARITY SCORES:
+${Object.entries(pairwiseScores).map(([name, score]) => `- ${name}: ${score.toFixed(3)}`).join('\n')}
+
+COMPOSITE SCORE: ${compositeScore.toFixed(3)}
+`;
+
+  const alignmentPrompt = `You are analyzing the semantic continuity between a target text and reference texts from a philosophical corpus.
+
+${summaryContext}
+
+Generate a detailed alignment summary with 5-7 key points covering:
+1. Main areas of agreement and shared conceptual frameworks
+2. Key divergences or conflicting positions
+3. Evolution of ideas across the texts
+4. Gaps or missing connections
+5. Overall coherence assessment
+
+Return a JSON object with this structure:
+{
+  "alignmentPoints": ["point 1", "point 2", ...]
+}
+
+Be specific and reference actual content from the texts.`;
+
+  const alignmentResponse = await getAICompletion({
+    systemPrompt: "You are an expert in epistemic analysis and philosophical continuity.",
+    userPrompt: alignmentPrompt,
+    temperature: 0.3,
+    maxTokens: 1000,
+  });
+
+  let alignmentSummary: string[];
+  try {
+    const parsed = JSON.parse(alignmentResponse);
+    alignmentSummary = parsed.alignmentPoints || ["Analysis generated"];
+  } catch {
+    alignmentSummary = [alignmentResponse.substring(0, 500)];
+  }
+
+  // Generate continuity-aligned rewrite if requested
+  let continuityRewrite: string | undefined;
+  if (alignRewrite) {
+    console.log("Generating continuity-aligned rewrite...");
+    
+    const rewritePrompt = `You are rewriting a target text to maximize semantic continuity with reference texts while preserving core meaning.
+
+${summaryContext}
+
+TASK: Rewrite the target text to harmonize with the reference texts. Maintain the original argument structure but:
+- Use terminology consistent with references
+- Align conceptual frameworks where possible
+- Address identified gaps or conflicts
+- Preserve the target's core claims
+- Enhance coherence with the broader corpus
+
+Return ONLY the rewritten text, no explanations.`;
+
+    continuityRewrite = await getAICompletion({
+      systemPrompt: "You are an expert philosophical writer specializing in epistemic coherence.",
+      userPrompt: rewritePrompt,
+      temperature: 0.4,
+      maxTokens: 2000,
+    });
+  }
+
   return {
-    target: "New Text",
-    referenceSet: [],
-    compositeScore: 0.5,
-    pairwise: {},
-    alignmentSummary: ["Implementation in progress"],
-    continuityRewrite: alignRewrite ? "Rewrite feature coming soon" : undefined,
+    target: `New Text (${countWords(text)} words)`,
+    referenceSet: referenceNames,
+    compositeScore,
+    pairwise: pairwiseScores,
+    alignmentSummary,
+    continuityRewrite,
   };
 }
