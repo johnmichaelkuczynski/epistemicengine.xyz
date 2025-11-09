@@ -1,0 +1,123 @@
+ Earlier it was pointed out that we seem to know of individual cases of metal s being heated and expanding for that reason before we know of the law in virtue of which heated metals expand: indeed, a precondition for our knowing of such a law seems to be that we know of individual cases of metal expanding in consequence of being heated.
+  In response to this, the following is likely to be said (and---though not as a response to this very point---has been said, innumerably many times, by advocates of DN, from Mill to Ernest Nagel):
+
+(#) We see many cases of metal objects being heated and then expanding. We are puzzled. So we posit a law L to the effect that metal expands when heated. Now that we (think we) know of this law, we are no longer puzzled.
+  You say that we can t know of L s existence until we know of individual cases of metal objects  expanding in consequence of being heated. This is not correct. We know of metal objects  expanding upon heated. But until we know of L, we don t know that there to be a cause-effect relationship between those objects  being heated and their expanding.
+
+  L is presumably to the effect that, for any metal object x, x expands if heated. If L doesn t support counterfactuals, it isn t a law. So L must support counterfactuals. But if it supports counterfactuals, L is a causal claim (for any metal object x, heating x causes it to expand). So let us suppose, as we must, that L is a causal claim.
+  If our only reason for thinking that x expands when heated is that x does expand when heated, then in positing a law to the effect that they are causally connected, all we are doing is saying: "It is so; for it must be so. 
+  In which case, L doesn t really explain anything. And in which case, furthermore, there is insufficient evidence for L, a consequence being that L isn t really a law so much as it is a tentative hypothesis, which, being of questionable veridicality, cannot serve as the basis of an explanation.
+  By the same token, if we have good reason to believe L to be a law, we must have reason to believe, independently of L, that this particular piece of metal expanded because it was heated, the same being true of that piece of metal piece, and also of that other piece of metal, and so on. How such knowledge is acquired is made clear over the course of the next ten sections.
+
+Causation as proportionality restoration
+Laws are usually expressed by dependence-relations:
+
+*The size-increase depends on the temperature increase.
+
+*The pressure-increase depends on the volume-decrease.
+
+  *The one object s acceleration depends on its mass and on the momentum of the object that collided with it.
+
+*The increase in x s mass, relative to a framework with respect to which x is accelerating, depends on the rate of acceleration.
+
+*The extent to which electron x s position can be known depends inversely on the extent to which its velocity can be known, and the extent to which x's momentum can be known depends inversely on the extent to which its position can be known.
+
+*The extent to which exercise lowers blood pressure depends on the amount of exercise done.
+
+*The extent to which insults wound a person depends on the extent to which he gives them credence.
+
+*The extent to which poverty leads to crime depends on the extent to which poverty leads to food-shortages.
+
+*The extent to which a person needs eight hours of sleep on a given night depends on the extent to which he is running a sleep deficit.
+
+*If a solid object is rotated around one of its end points, the extent to which it remains straight depends inversely on the length of the object.
+
+   A related point is that if a given force (e.g. gravity) is acting on an object, it doesn t follow that the object s state of motion changes or that the object otherwise changes. If another force,
+e.g. an opposite and equally strong gravitational force, is acting on it, the resulting movement on the part of the object will be the vector sum of both forces. (Whence the distinction, notional if not actual, between kinematics and dynamics.) The object may therefore remain stationary or it may move, in any direction with any degree of rapidity. [8]
+
+Physical laws as regularities of proportion
+  Threshold effects aside, effects are proportional to their causes. This has several consequences, none of them consistent with RA or with DN.
+  First of all, laws are not expressed by regularities. A collision may or may not displace an object. It may be destroy it. It may not destroy it, but may fail to make it budge. If it does displace it, it could move, with any degree of rapidity, along any one of a number of a possible trajectories. If conditions are held constant, then events that are identical in respect of momentum or temperature (or whatever the relevant parameters are) have the same effects, in which case causal relations are expressed by regularities. If there is to be a perfect regularity of some kind, there must an event e such that perfect e-duplicates occur over and over. That condition isn t met if conditions are at all variable, since inputs vary when conditions vary.
+  Second, to the extent that laws are expressed by regularities, they are expressed by regularities of proportion: volume increases directly proportional to temperature increases; gravitational attraction is proportional to the masses of the bodies in question; if an object is subject to no differential forces, the degree to which its trajectory deviates from a straight line depends on the length of that trajectory.
+  So if indeed causal nexuses are regularities, they aren t regularities of the form e-similar events always precede e*-similar events. They are regularities of proportion and are therefore regularities of a much more abstract kind than those that the DN-advocate has in mind.
+
+Explanation of the fact that statistics tend to track causal substructure
+
+  In some cases, we may get lucky: conditions may remain perfectly constant; a series of events occurs each member of which is qualitatively and quantitatively just like each of the others. In that case, the effect of any given one of those events will be the same, qualitatively and quantitatively, as the effect of any other given one of those events.
+  But circumstances don't remain constant, and they don't have to remain constant for us to learn what causes what. Events are changes. The greater the change, the greater then effect. As long as we can correlate input-differences with output-differences, we can establish causality.
+  A corollary is that a singular events are the effects of a singular antecedent, and, when given a singular event, we know its cause as soon as we identify a singularity among its antecedents.
+  Example: You are a square: somebody who follows all the rules. One night, after a lifetime of celibacy, you decide to sleep with a lady of the night. A few days later, you have a venereal disease.
+  Singular event: the malady. Singular antecedent: the dalliance. Effect: disease. Probable cause: The dalliance.
+  Do such dalliances always lead to venereal disease, or even most of the time? No. Does it matter? No. You know of some event predating your malady that is as singular as your malady. Were that event not the cause of your malady, you would have a genuine anomaly on your hands; but since it is, you don't.
+  Of course, if you had dalliances with 35 such women, then of course you would not be able to pinpoint the cause---but only because any given one of those events could be the cause, notwithstanding that not a single one of them was an instance of an event-type whose instances are always, or even usually, followed by the onset of disease.
+  And this proves the point at hand, that, when e is known to be the cause of e*, it isn t because e-e* is an instance of a perfect regularity; it s because, of e* s various antecedents, e is the only one that is proportional to e*.
+  If e* has many antecedents e1 en, each of them proportional to e*, then e* has many possible causes. In that case, the actual cause has to be decided experimentally. For each i (1?i?n), does an ei-similar lead to an e*-similar event, under conditions similar to those under which e brought about e*? Supposing that the answer is in each case  no,  then, pending further information, e must be presumed to be the cause of e*.
+Another example: You force yourself to run three miles. You have a heart-attack.
+  Singular event: the heart-attack. Singular antecedent: you run three miles. (You ve never run so much as a 100 yards in your life.)
+  Do all or even most physically unfit people who run three miles have heart-attacks? No. But there needn't be such a regularity for the jog to have brought on the heart-attack, and you don t need to know of such a regularity, to know what brought on your heart-attack.
+  Given that we can know what causes a given event without knowing of any law L that links cause and effect, it follows, given that to explain an event is to identify its cause, that we can sometimes explain events without explaining them in terms of laws.
+  To explain an event in detail is to explain how the specifics of the event depended on the specifics of the cause, and for that we do need laws. We need laws if we are to have scientific explanations, Where SE is a scientific explanation of an event e just in case:
+
+(i) SE identifies the event e* that caused e,
+(ii) SE identifies the law in virtue of which e* caused e*; and, so it follows,
+(iii) SE identifies just what it was about e* that was responsible for its bringing about e.
+
+  But scientific explanations presuppose prescientific explanations. We must distinguish between non-explanations and pre-scientific explanations. Non-explanations are not pre- scientific explanations. If my explanation of the fact that I burnt my hand is that I touched a hot surface, my explanation is correct, but not scientific. If my explanation is that my parents weren t home and it wasn t my touching the hot-stove per se but my transgressing their instructions (don t touch the stove) that caused me to feel scorching pain, then my explanation is false. Also, if my parents give me permission to touch the stove (thinking that it s off), and (because it s on) I scorch my hand, I ll know that, indeed, it was, on each occasion, because the stove was hot that I burnt on my hand; and on neither occasion is it necessary that I know of some regularity to the effect that all people who touch hot stoves feel pain.[9]
+
+The role of experimentation in the acquisition of causal knowledge
+
+  If it is always so obvious what causes what, why do scientists bother with tests? Why do they repeat the same experiment over and over?
+  Scientific tests have a number of functions. First of all, people s causal beliefs aren t always correct. This is partly due to the fact that, as was pointed out in class, a given event may have a number of equally salient antecedents. To a larger extent, however, it s due to the fact that, when people look for causes, they have some tendency to look for causes that fit a pre-existing narrative and, to that extent, tend not to look for the actual causes.  I didn t get the job: my ex- boss must have blacklisted me.  I m overlooking the fact that I was 45 minutes late to the interview.
+  Another reason is that experiments identify specific information about causes that is not easy to come by in non-experimental settings. It s easy to know that a monkey-bite made you sick.
+It s hard to know exactly what it was that the monkey transmitted to you. And it won t be known if experiments aren t done (not necessarily on you personally, but on other monkey-bite victims). Also it would be hard to know under whether the pathogen that was transmitted to you would,
+if transplanted into another person s bloodstream, affect that person: maybe your immune-system is unusual in some way.
+  Further, it would be hard to know whether or not a bite, or some other way of intravenously introducing the pathogen, is the only way of doing so: Is the pathogen airborne? If not, is it transmitted through casual contact? These questions cannot be answered except on the basis of controlled studies. At the same time, those controlled studies presuppose correct if approximate beliefs as to what, in some given case, led to some malady relevantly similar to yours.
+  Further, supposing that events of kind cause events of some other kind, it s only in controlled environments that the exact nature of the operative dependence-relation can be learned. It s easy to figure out that hitting a ball makes it move. It s hard to figure out the specifics. It s hard to identify a true, general principle to the effect that, given an object x, if x has such and such a structure and can therefore withstand impacts of a certain amount of force without being deformed, then, neglecting friction and air-resistance, if x is struck by an object with momentum m, then x will be displaced by a certain amount.
+
+The instantaneousness of the interval between cause and effect
+
+  If e is the cause of e*, e precedes e*. Given that no event is instantaneous, this means that each takes time to occur and, therefore, that it takes time for both of them to occur.
+  Let INT be the interval during which e and e* happen. Events could have occurred after e that prevented e* from occurring or at least prevented it from occurring in the exact way it did. Ball A collides with ball B. The collision causes B to move to the edge of the table. During the time that it took B to travel to the table-edge, events could have intervened (somebody could have grabbed B, it might have been subjected to extreme heat and disintegrated as a result, and so on) that would have prevented B from doing so. Supposing that the distance from the collision to the table s edge is n meters, given any spatial interval less than n, no matter how small, events could have occurred that would have prevented B from traveling that distance or from traveling that distance along that particular trajectory.
+  Thus, given any non-null time-interval, interval-initial circumstances of a given kind are compatible with interval-terminal circumstances of many different kinds. The shorter the intervals one considers, the greater the guarantee the probability that interval-initial events will have these as opposed to those interval-terminal outcomes. But that probability is always less than 100%. It approaches 100%, as one considers increasingly small intervals. But, since nothing happens during null time-intervals, the probability that a given event will eventuate in this as opposed to that sort of event is always less than 100%.
+  Therefore, instances of causation are not instances of regularity. For e to be the cause of e* is not for e-similar events to always precede e*-similar events. Whatever it is to be an  e-similar  or an  e*-similar  event, e-similar events---though causative, in some contexts, of e*-similar events---are not necessarily always followed by e*-similar events.
+  This in turn means that, if L is the law in virtue of which e caused e*, L is not to the effect that e-similar events always precede e*-similar events; indeed, L is not to the effect that events of any kind follow events of some other kind. It follows that laws are not regularities. It also follows that laws are not  forces  or  structures  that are responsible for regularities.
+
+Natural Laws dispositive of, but not identical with, regularities
+
+The law of inertia disposes bodies have constant velocities during arbitrarily long intervals.
+And, given some body x, so long as x s state of motion is governed by no law other than the law of inertia, its state of motion will indeed remain constant. Further, if x is acted upon by many forces other than the force of inertia[10], x s state of motion will still remain constant so long as those other forces cancel one another out.
+It was on the basis of his knowledge of this fact that Galileo discovered the law of inertia.
+Galileo considered bodies that, apart from their own inertias, were in states of varying degrees of equilibrium; and he found that that, the closer the equilibrium in question was to perfect equilibrium, the more the projectile in question was to have a constant state of motion (during the time-interval during which that equilibrium lasted).
+  It was on the basis of this same principle that the Inverse Square-law (the gravitational attraction between x and y is directly proportional to their masses and inversely proportional to the square of the distance between them) was definitively verified. An environment was constructed in which each of two balls were in a state of perfect equilibrium, except with respect to the gravitational attraction of the other ball: and the balls moved in exactly the way that, according to ISL, they would move if no forces, other than the gravitational pulls they exerted on each other, were acting on them.
+  But no physical object is isolated from all others. And if a given physical object is in equilibrium with respect to all forces but one, it is seldom for very long. For these two reasons, it is only under exceptional circumstances that laws give rise to regularities.
+
+How we know what causes what
+According to Hume, we know that e causes e* because
+
+(i) e immediately precedes, and is adjacent with, e*,
+
+and
+
+(ii) e-similar events always immediately precede adjacent e*-similar events.
+
+  This is not typically how we learn what causes what. If it is known that, apart from being collided with by ball A, hitherto stationary ball B was in a state of equilibrium, then it is known that the collision was necessarily the cause the change in B s state of motion.
+ But can it ever be known that a given thing is in equilibrium in every respect but one? 
+  It can be known that, in every respect but one, a given thing is in a state that is sufficiently equilibrium-like that there was but one possible cause of some change subsequently undergone by that thing.
+  If it is known that, apart from the nasty remark I just made about your cooking, you were in a state of relative psychological equilibrium, then, even though most people whose cooking is insult don't go into a fit of rage, I know that your outburst was indeed the effect of my remark.
+  Thus, if we know that e is the cause of e*, it isn t necessarily because we have observed some regularity of which that event-sequence (e followed by e*) is an instance. In many cases, there is no such regularity. Cf. the just-discussed tantrum.
+  And in many cases where there is such a regularity, it isn t on the basis of our knowledge of that regularity that we know e to be the cause of e* Cf. the situation.
+  A child touches a hot stove and feels excruciating pain. He knows on that basis alone that touching a hot stove will lead to excruciating pain. He knows this because he knows that, apart from the fact that he was touching the stove, there was nothing distinctive about his situation. It is true that, whenever people touch hot stoves, they feel excruciating pain. So there is in this case a regularity of which the event-sequence in question is an instance. But it isn t on the basis of the child s knowledge of such a regularity that he knows what caused his pain.
+
+Knowledge-why=high-resolution knowledge-what
+  It may be that, unless one has knowledge of laws, one cannot know why a given event followed some other event. But without knowledge of laws one can obviously know that the first event was indeed the cause of the second.
+  Hume seems to have thought that, unless it is known why the collision caused the hitherto stationary ball to move---unless Newton s second law of motion is known, along with A s momentum at the time of the collision and B s mass	it cannot be known that the collision is
+the cause of its moving; that in order to know that e is the cause of e*, one must know of some  covering law  of which that event-sequence is an instance. And this, we have seen, is false.
+
+Singular causation and the falsity of the Deductive-Nomological Model of explanation
+
+  To know what caused an event is to know how to explain it. I can explain your tantrum: I insulted you. There are certainly better explanations	one that might be known to your
+psychoanalyst: but according to each of those explanations, the insult triggered the tantrum.
+  The difference between my explanation (I insulted you) and Freud s (given your desire to fill the shoes of your father, who is a revered chef, and given your high opinion of my cake-related opinions, the insult initiated a bout of self-loathing, reinforced by loathing of your father for imposing such high standards on you, whose intensity was so extreme that no non-tantrum- throwing behavior could have discharged it adequately), is that the latter is more high-resolution than the former. But the latter includes the former	just as Galileo s explanation of the change in
+B s state of motion will include the layperson s explanation.
+  This shows that, contrary to what DN assumes, not all explanations are law-based. In some cases we know that e causes e*, and we are therefore know a (low-resolution but otherwise) correct explanation of the latter, even though we don t know of any law that connects the two events.
+  It also shows that knowledge of (low-level but otherwise) correct explanations of facts is a prerequisite to knowledge of natural law. In order to learn Newton s second law (the acceleration of an object depends directly upon the net force acting upon that object and indirectly on the object s mass), one must know that certain collisions are responsible for certain displacements. If one doesn t know this, then one a fortiori doesn t know that among the (invariably very numerous) laws determinative of the exact nature of the accelerations of the displaced objects, one of them is that the acceleration of the displaced object is inversely proportional to its mass and directly proportional the net force acting on it.

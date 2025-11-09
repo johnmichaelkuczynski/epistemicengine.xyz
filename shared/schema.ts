@@ -41,7 +41,8 @@ export const moduleTypeSchema = z.enum([
   "epistemic-inference",
   "justification-builder", 
   "knowledge-utility-mapper",
-  "cognitive-integrity"
+  "cognitive-integrity",
+  "cognitive-continuity"
 ]);
 
 export type ModuleType = z.infer<typeof moduleTypeSchema>;
@@ -166,6 +167,30 @@ export const cognitiveIntegrityResultSchema = z.object({
 
 export type CognitiveIntegrityResult = z.infer<typeof cognitiveIntegrityResultSchema>;
 
+// ==================== COGNITIVE CONTINUITY LAYER MODULE ====================
+
+export const continuityDiagnosticsSchema = z.object({
+  CrossPhaseCoherence: z.number().min(0).max(1),
+  TemporalStability: z.number().min(0).max(1),
+  ProgressiveIntegration: z.number().min(0).max(1),
+  ErrorPropagationIndex: z.number().min(0).max(1),
+  SystemicCompression: z.number().min(0).max(1),
+  ContinuityComposite: z.number().min(0).max(1),
+});
+
+export type ContinuityDiagnostics = z.infer<typeof continuityDiagnosticsSchema>;
+
+export const cognitiveContinuityResultSchema = z.object({
+  cross_phase_context: z.string(),
+  continuity_analysis: z.record(z.string(), z.any()),
+  conflict_nodes: z.array(z.string()),
+  continuity_aligned_rewrite: z.string(),
+  diagnostics: continuityDiagnosticsSchema,
+  interpretation_summary: z.string(),
+});
+
+export type CognitiveContinuityResult = z.infer<typeof cognitiveContinuityResultSchema>;
+
 // ==================== API REQUEST/RESPONSE SCHEMAS ====================
 
 export const analyzeRequestSchema = z.object({
@@ -185,6 +210,7 @@ export const analyzeResponseSchema = z.object({
     justificationBuilderResultSchema,
     knowledgeUtilityResultSchema,
     cognitiveIntegrityResultSchema,
+    cognitiveContinuityResultSchema,
   ]).optional(),
   processingTime: z.number().optional(),
 });

@@ -8,6 +8,8 @@ import {
   KNOWLEDGE_UTILITY_USER_PROMPT,
   COGNITIVE_INTEGRITY_SYSTEM_PROMPT,
   COGNITIVE_INTEGRITY_USER_PROMPT,
+  COGNITIVE_CONTINUITY_SYSTEM_PROMPT,
+  COGNITIVE_CONTINUITY_USER_PROMPT,
   ARGUMENT_DETECTION_SYSTEM_PROMPT,
   ARGUMENT_DETECTION_USER_PROMPT,
 } from "./epistemic-prompts";
@@ -16,6 +18,7 @@ import type {
   JustificationBuilderResult,
   KnowledgeUtilityResult,
   CognitiveIntegrityResult,
+  CognitiveContinuityResult,
 } from "@shared/schema";
 
 // ==================== UTILITIES ====================
@@ -420,6 +423,87 @@ export async function processCognitiveIntegrity(
       LevelCoherence: avgLevelCoherence,
       CompositeScore: avgCompositeScore,
       IntegrityType: integrityType,
+    },
+    interpretation_summary: `Multi-chunk synthesis: ${allInterpretations}`,
+  };
+}
+
+// ==================== COGNITIVE CONTINUITY LAYER ====================
+
+async function processCognitiveContinuityChunk(
+  text: string,
+  priorContext?: string
+): Promise<CognitiveContinuityResult> {
+  const completion = await getAICompletion({
+    systemPrompt: COGNITIVE_CONTINUITY_SYSTEM_PROMPT,
+    userPrompt: COGNITIVE_CONTINUITY_USER_PROMPT(text, priorContext),
+    temperature: 0.5,
+    maxTokens: 4096,
+  });
+
+  const result: CognitiveContinuityResult = JSON.parse(completion);
+  return result;
+}
+
+export async function processCognitiveContinuity(
+  text: string,
+  priorContext?: string
+): Promise<CognitiveContinuityResult> {
+  const chunks = segmentText(text, 2000);
+  
+  if (chunks.length === 1) {
+    return processCognitiveContinuityChunk(text, priorContext);
+  }
+  
+  console.log(`Processing ${chunks.length} chunks for cognitive continuity analysis`);
+  
+  const chunkResults: CognitiveContinuityResult[] = [];
+  for (let i = 0; i < chunks.length; i++) {
+    console.log(`Processing chunk ${i + 1}/${chunks.length}`);
+    const result = await processCognitiveContinuityChunk(chunks[i], priorContext);
+    chunkResults.push(result);
+  }
+  
+  // Synthesize results from multiple chunks
+  // Aggregate context, merge continuity analysis, collect all conflict nodes
+  const synthesizedContext = `Synthesized analysis from ${chunks.length} text chunks (${countWords(text)} words total). ${chunkResults[0].cross_phase_context}`;
+  
+  // Merge continuity analysis objects
+  const mergedContinuityAnalysis: Record<string, any> = {};
+  chunkResults.forEach((r, i) => {
+    Object.entries(r.continuity_analysis).forEach(([key, value]) => {
+      mergedContinuityAnalysis[`chunk_${i + 1}_${key}`] = value;
+    });
+  });
+  
+  // Collect all conflict nodes
+  const allConflictNodes = chunkResults.flatMap(r => r.conflict_nodes);
+  
+  // Stitch rewrites together
+  const synthesizedRewrite = chunkResults.map(r => r.continuity_aligned_rewrite).join('\n\n');
+  
+  // Average all numeric metrics
+  const avgCrossPhase = chunkResults.reduce((sum, r) => sum + r.diagnostics.CrossPhaseCoherence, 0) / chunkResults.length;
+  const avgTemporal = chunkResults.reduce((sum, r) => sum + r.diagnostics.TemporalStability, 0) / chunkResults.length;
+  const avgProgressive = chunkResults.reduce((sum, r) => sum + r.diagnostics.ProgressiveIntegration, 0) / chunkResults.length;
+  const avgErrorProp = chunkResults.reduce((sum, r) => sum + r.diagnostics.ErrorPropagationIndex, 0) / chunkResults.length;
+  const avgSystemic = chunkResults.reduce((sum, r) => sum + r.diagnostics.SystemicCompression, 0) / chunkResults.length;
+  const avgComposite = chunkResults.reduce((sum, r) => sum + r.diagnostics.ContinuityComposite, 0) / chunkResults.length;
+  
+  const allInterpretations = chunkResults.map((r, i) => `Chunk ${i + 1}: ${r.interpretation_summary}`).join(' ');
+  
+  return {
+    cross_phase_context: synthesizedContext,
+    continuity_analysis: mergedContinuityAnalysis,
+    conflict_nodes: allConflictNodes,
+    continuity_aligned_rewrite: synthesizedRewrite,
+    diagnostics: {
+      CrossPhaseCoherence: avgCrossPhase,
+      TemporalStability: avgTemporal,
+      ProgressiveIntegration: avgProgressive,
+      ErrorPropagationIndex: avgErrorProp,
+      SystemicCompression: avgSystemic,
+      ContinuityComposite: avgComposite,
     },
     interpretation_summary: `Multi-chunk synthesis: ${allInterpretations}`,
   };

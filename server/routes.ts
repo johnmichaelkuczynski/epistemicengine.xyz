@@ -8,6 +8,7 @@ import {
   processJustificationBuilder,
   processKnowledgeUtility,
   processCognitiveIntegrity,
+  processCognitiveContinuity,
 } from "./processing";
 import { storage } from "./storage";
 
@@ -72,6 +73,10 @@ export function registerRoutes(app: Express) {
         
         case "cognitive-integrity":
           result = await processCognitiveIntegrity(text);
+          break;
+        
+        case "cognitive-continuity":
+          result = await processCognitiveContinuity(text);
           break;
         
         default:
