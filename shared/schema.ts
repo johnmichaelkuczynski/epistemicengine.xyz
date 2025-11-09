@@ -1,4 +1,39 @@
 import { z } from "zod";
+import { pgTable, uuid, text, timestamp, jsonb, index, integer } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+
+// ==================== DATABASE TABLES ====================
+
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  username: text("username").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const analysisHistory = pgTable("analysis_history", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id"),
+  moduleType: text("module_type").notNull(),
+  inputText: text("input_text").notNull(),
+  wordCount: integer("word_count").notNull(),
+  result: jsonb("result").notNull(),
+  processingTime: integer("processing_time"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  userIdIdx: index("user_id_idx").on(table.userId),
+  moduleTypeIdx: index("module_type_idx").on(table.moduleType),
+  createdAtIdx: index("created_at_idx").on(table.createdAt),
+}));
+
+export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;
+
+export type AnalysisHistoryRecord = typeof analysisHistory.$inferSelect;
+export type InsertAnalysisHistory = typeof analysisHistory.$inferInsert;
+
+export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
+export const insertAnalysisHistorySchema = createInsertSchema(analysisHistory).omit({ id: true, createdAt: true });
 
 // ==================== ANALYSIS TYPES ====================
 

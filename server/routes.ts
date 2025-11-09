@@ -8,6 +8,7 @@ import {
   processJustificationBuilder,
   processKnowledgeUtility,
 } from "./processing";
+import { storage } from "./storage";
 
 export function registerRoutes(app: Express) {
   const server = createServer(app);
@@ -28,14 +29,14 @@ export function registerRoutes(app: Express) {
       const { text, moduleType } = validationResult.data;
       const wordCount = countWords(text);
 
-      // Check word limit
-      if (wordCount > 2000) {
+      // Check word limit (10,000 words with automatic chunking)
+      if (wordCount > 10000) {
         return res.status(400).json({
           success: false,
           wordCount,
-          error: "Text exceeds 2,000-word limit",
+          error: "Text exceeds 10,000-word limit",
           code: "OVERLENGTH",
-          diagnosticMessage: "Please reduce the input to 2,000 words or less.",
+          diagnosticMessage: "Please reduce the input to 10,000 words or less.",
         });
       }
 
@@ -78,6 +79,20 @@ export function registerRoutes(app: Express) {
 
       const processingTime = Date.now() - startTime;
 
+      // Save to database
+      try {
+        await storage.saveAnalysis({
+          userId: null,
+          moduleType,
+          inputText: text,
+          wordCount,
+          result: result as any,
+          processingTime,
+        });
+      } catch (dbError) {
+        console.error("Failed to save analysis to database:", dbError);
+      }
+
       // Explicitly set isArgumentative to true since we processed it
       const response = {
         success: true,
@@ -96,6 +111,65 @@ export function registerRoutes(app: Express) {
         success: false,
         error: error instanceof Error ? error.message : "An unexpected error occurred",
         code: "PROCESSING_ERROR",
+      });
+    }
+  });
+
+  // History endpoints
+  app.get("/api/history", async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const history = await storage.getAnalysisHistory(undefined, limit);
+      
+      return res.json({
+        success: true,
+        history,
+      });
+    } catch (error) {
+      console.error("Failed to fetch history:", error);
+      return res.status(500).json({
+        success: false,
+        error: "Failed to fetch analysis history",
+      });
+    }
+  });
+
+  app.get("/api/history/:id", async (req: Request, res: Response) => {
+    try {
+      const analysis = await storage.getAnalysisById(req.params.id);
+      
+      if (!analysis) {
+        return res.status(404).json({
+          success: false,
+          error: "Analysis not found",
+        });
+      }
+      
+      return res.json({
+        success: true,
+        analysis,
+      });
+    } catch (error) {
+      console.error("Failed to fetch analysis:", error);
+      return res.status(500).json({
+        success: false,
+        error: "Failed to fetch analysis",
+      });
+    }
+  });
+
+  app.delete("/api/history/:id", async (req: Request, res: Response) => {
+    try {
+      await storage.deleteAnalysis(req.params.id);
+      
+      return res.json({
+        success: true,
+      });
+    } catch (error) {
+      console.error("Failed to delete analysis:", error);
+      return res.status(500).json({
+        success: false,
+        error: "Failed to delete analysis",
       });
     }
   });
