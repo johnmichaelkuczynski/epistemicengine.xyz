@@ -71,7 +71,7 @@ export class MemStorage implements IStorage {
     const user: User = { 
       id, 
       username: insertUser.username,
-      passwordHash: insertUser.passwordHash,
+      passwordHash: insertUser.passwordHash || null,
       createdAt: now
     };
     this.usersMap.set(id, user);

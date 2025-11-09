@@ -1,10 +1,10 @@
 import { useState, useMemo } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, AlertCircle, CheckCircle2, Moon, Sun, History as HistoryIcon, X } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2, Moon, Sun, History as HistoryIcon, X, LogOut } from "lucide-react";
 import { ModuleSelector } from "@/components/ModuleSelector";
 import { TextInputArea } from "@/components/TextInputArea";
 import { ReferenceTextSelector } from "@/components/ReferenceTextSelector";
@@ -13,7 +13,7 @@ import { JustificationBuilderResults } from "@/components/JustificationBuilderRe
 import { KnowledgeUtilityResults } from "@/components/KnowledgeUtilityResults";
 import { CognitiveIntegrityResults } from "@/components/CognitiveIntegrityResults";
 import { CognitiveContinuityResults } from "@/components/CognitiveContinuityResults";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { ModuleType, AnalyzeResponse, EpistemicInferenceResult, JustificationBuilderResult, KnowledgeUtilityResult, CognitiveIntegrityResult, CognitiveContinuityResult } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
@@ -22,7 +22,23 @@ export default function Home() {
   const [inputText, setInputText] = useState("");
   const [selectedReferenceIds, setSelectedReferenceIds] = useState<string[]>([]);
   const [darkMode, setDarkMode] = useState(false);
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
+
+  const { data: userData } = useQuery<{ success: boolean; user: any }>({
+    queryKey: ["/api/me"],
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/logout", {});
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.clear();
+      setLocation("/login");
+    },
+  });
 
   const handleModuleChange = (newModule: ModuleType) => {
     setSelectedModule(newModule);
@@ -135,7 +151,7 @@ export default function Home() {
             <div>
               <h1 className="text-2xl font-bold text-foreground">Epistemic Reasoning Engine</h1>
               <p className="text-sm text-muted-foreground mt-0.5">
-                AI-powered analysis of argumentative text
+                Logged in as: <span className="font-medium">{userData?.user?.username || 'Guest'}</span>
               </p>
             </div>
             <div className="flex gap-2">
@@ -145,6 +161,16 @@ export default function Home() {
                   History
                 </Button>
               </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => logoutMutation.mutate()}
+                disabled={logoutMutation.isPending}
+                data-testid="button-logout"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"

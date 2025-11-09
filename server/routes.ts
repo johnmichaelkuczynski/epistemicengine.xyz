@@ -14,6 +14,82 @@ import { storage } from "./storage";
 
 export function registerRoutes(app: Express) {
   const server = createServer(app);
+  
+  // ==================== AUTH ROUTES ====================
+  
+  // Username-only login (no password required)
+  app.post("/api/login", async (req: Request, res: Response) => {
+    try {
+      const { username } = req.body;
+      
+      if (!username || typeof username !== 'string') {
+        return res.status(400).json({
+          success: false,
+          error: "Username is required",
+        });
+      }
+      
+      const normalizedUsername = username.toLowerCase().trim();
+      
+      // Find or create user
+      let user = await storage.getUserByUsername(normalizedUsername);
+      
+      if (!user) {
+        // Create new user with username-only (no password)
+        user = await storage.createUser({
+          username: normalizedUsername,
+          passwordHash: null,
+        });
+        console.log(`Created new user: ${normalizedUsername}`);
+      }
+      
+      // Store user in session
+      req.session.userId = user.id;
+      req.session.username = user.username;
+      
+      return res.json({
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+        },
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      return res.status(500).json({
+        success: false,
+        error: "Login failed",
+      });
+    }
+  });
+  
+  // Logout
+  app.post("/api/logout", (req: Request, res: Response) => {
+    req.session.destroy(() => {
+      res.json({ success: true });
+    });
+  });
+  
+  // Get current user
+  app.get("/api/me", (req: Request, res: Response) => {
+    if (req.session.userId) {
+      return res.json({
+        success: true,
+        user: {
+          id: req.session.userId,
+          username: req.session.username,
+        },
+      });
+    }
+    
+    return res.json({
+      success: false,
+      user: null,
+    });
+  });
+  
+  // ==================== ANALYSIS ROUTES ====================
+  
   app.post("/api/analyze", async (req: Request, res: Response) => {
     const startTime = Date.now();
 
@@ -89,10 +165,10 @@ export function registerRoutes(app: Express) {
 
       const processingTime = Date.now() - startTime;
 
-      // Save to database
+      // Save to database (associated with logged-in user)
       try {
         await storage.saveAnalysis({
-          userId: null,
+          userId: req.session.userId || null,
           moduleType,
           inputText: text,
           wordCount,
@@ -129,7 +205,9 @@ export function registerRoutes(app: Express) {
   app.get("/api/history", async (req: Request, res: Response) => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
-      const history = await storage.getAnalysisHistory(undefined, limit);
+      // Filter by logged-in user
+      const userId = req.session.userId;
+      const history = await storage.getAnalysisHistory(userId, limit);
       
       return res.json({
         success: true,
