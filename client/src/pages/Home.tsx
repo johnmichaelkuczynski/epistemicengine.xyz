@@ -4,7 +4,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, AlertCircle, CheckCircle2, Moon, Sun, History as HistoryIcon } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2, Moon, Sun, History as HistoryIcon, X } from "lucide-react";
 import { ModuleSelector } from "@/components/ModuleSelector";
 import { TextInputArea } from "@/components/TextInputArea";
 import { EpistemicInferenceResults } from "@/components/EpistemicInferenceResults";
@@ -89,6 +89,11 @@ export default function Home() {
     analyzeMutation.mutate({ text: inputText, moduleType: selectedModule });
   };
 
+  const handleClear = () => {
+    setInputText("");
+    analyzeMutation.reset();
+  };
+
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
     document.documentElement.classList.toggle("dark");
@@ -167,22 +172,35 @@ export default function Home() {
                 {selectedModule === "epistemic-inference" && "Analyzes justificatory structure, evaluates coherence, and rewrites text"}
                 {selectedModule === "justification-builder" && "Reconstructs missing premises and inferential links"}
                 {selectedModule === "knowledge-utility-mapper" && "Extracts practical value and utility from theoretical claims"}
+                {selectedModule === "cognitive-integrity" && "Detects authentic reasoning and provides diagnostic integrity metrics"}
               </div>
-              <Button
-                onClick={handleAnalyze}
-                disabled={analyzeMutation.isPending || !inputText.trim() || wordCount > 10000}
-                size="lg"
-                data-testid="button-analyze"
-              >
-                {analyzeMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  "Analyze Text"
-                )}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleClear}
+                  disabled={analyzeMutation.isPending || !inputText.trim()}
+                  size="lg"
+                  data-testid="button-clear"
+                >
+                  <X className="mr-2 h-4 w-4" />
+                  Clear
+                </Button>
+                <Button
+                  onClick={handleAnalyze}
+                  disabled={analyzeMutation.isPending || !inputText.trim() || wordCount > 10000}
+                  size="lg"
+                  data-testid="button-analyze"
+                >
+                  {analyzeMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    "Analyze Text"
+                  )}
+                </Button>
+              </div>
             </div>
           </Card>
 
