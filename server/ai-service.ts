@@ -41,6 +41,16 @@ function cleanJSONResponse(response: string): string {
   return cleaned;
 }
 
+// Timeout wrapper for promises
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, providerName: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => 
+      setTimeout(() => reject(new Error(`${providerName} timeout after ${timeoutMs}ms`)), timeoutMs)
+    )
+  ]);
+}
+
 export async function getAICompletion(
   options: AICompletionOptions,
   preferredProvider: AIProvider = "anthropic"
@@ -62,13 +72,27 @@ export async function getAICompletion(
     try {
       console.log(`Attempting AI completion with provider: ${provider}`);
       
+      const timeoutMs = 60000; // 60 second timeout
+      
       switch (provider) {
         case "anthropic":
-          return await getAnthropicCompletion(systemPrompt, userPrompt, temperature, maxTokens);
+          return await withTimeout(
+            getAnthropicCompletion(systemPrompt, userPrompt, temperature, maxTokens),
+            timeoutMs,
+            "Anthropic"
+          );
         case "openai":
-          return await getOpenAICompletion(systemPrompt, userPrompt, temperature, maxTokens);
+          return await withTimeout(
+            getOpenAICompletion(systemPrompt, userPrompt, temperature, maxTokens),
+            timeoutMs,
+            "OpenAI"
+          );
         case "deepseek":
-          return await getDeepSeekCompletion(systemPrompt, userPrompt, temperature, maxTokens);
+          return await withTimeout(
+            getDeepSeekCompletion(systemPrompt, userPrompt, temperature, maxTokens),
+            timeoutMs,
+            "DeepSeek"
+          );
       }
     } catch (error) {
       console.error(`Provider ${provider} failed:`, error);
