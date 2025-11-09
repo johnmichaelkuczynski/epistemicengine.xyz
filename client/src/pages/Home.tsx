@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, AlertCircle, CheckCircle2, Moon, Sun } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2, Moon, Sun, History as HistoryIcon } from "lucide-react";
 import { ModuleSelector } from "@/components/ModuleSelector";
 import { TextInputArea } from "@/components/TextInputArea";
 import { EpistemicInferenceResults } from "@/components/EpistemicInferenceResults";
@@ -117,14 +118,22 @@ export default function Home() {
                 AI-powered analysis of argumentative text
               </p>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleDarkMode}
-              data-testid="button-theme-toggle"
-            >
-              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </Button>
+            <div className="flex gap-2">
+              <Link href="/history">
+                <Button variant="ghost" size="sm" data-testid="button-history">
+                  <HistoryIcon className="h-4 w-4 mr-2" />
+                  History
+                </Button>
+              </Link>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleDarkMode}
+                data-testid="button-theme-toggle"
+              >
+                {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
+            </div>
           </div>
         </div>
       </header>
