@@ -5,6 +5,10 @@ import { storage } from "./storage";
 
 const app = express();
 
+app.get("/api/zhianalyze", (req, res) => {
+  res.json({ ok: true, message: "Zhi Engine responding with JSON" });
+});
+
 app.post("/api/zhianalyze", (req, res) => {
   res.json({ ok: true, message: "Zhi Engine responding with JSON" });
 });
