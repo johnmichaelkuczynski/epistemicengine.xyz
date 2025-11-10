@@ -5,6 +5,10 @@ import { storage } from "./storage";
 
 const app = express();
 
+app.post("/api/zhianalyze", (req, res) => {
+  res.json({ ok: true, message: "Zhi Engine responding with JSON" });
+});
+
 declare module 'http' {
   interface IncomingMessage {
     rawBody: unknown
