@@ -25,7 +25,7 @@ Return your analysis as a valid JSON object with this exact structure:
     "conceptualCompleteness": "e.g., Missing definition of key term X",
     "issues": ["Issue 1", "Issue 2"]
   },
-  "rewrittenText": "A fully explicit version where all hidden premises are surfaced and all inferential steps are clear",
+  "rewrittenText": "THE ACTUAL REWRITTEN TEXT GOES HERE - NOT suggestions or comments about how to improve it",
   "overallCoherence": 0.85,
   "metaJudgment": "Optional overall assessment of the argument's epistemic status"
 }
@@ -35,7 +35,18 @@ Key principles:
 - Surface hidden premises that must be true for the inference to hold
 - Assess coherence on 0-1 scale (1 = perfect logical coherence)
 - Be precise about inference types
-- In rewrite, maintain the author's intent while making structure crystal clear`;
+
+CRITICAL FOR REWRITE:
+- The "rewrittenText" field MUST contain the ACTUAL REWRITTEN VERSION of the input text
+- DO NOT provide suggestions, comments, or meta-commentary about how to improve the text
+- DO NOT say "The text could be clarified by..." or "Consider making explicit..."
+- INSTEAD: Actually write out the full text with all premises and inferences made explicit
+- Keep the same core claims and arguments, but expand them to show every logical step
+- Make hidden assumptions explicit by inserting them into the text itself
+- Use phrases like "Given that...", "This follows because...", "The underlying assumption is..."
+- The rewrite should be a stand-alone text that someone could read and understand the full argument
+- Maintain the author's voice and intent while making the reasoning transparent`;
+
 
 export const EPISTEMIC_INFERENCE_USER_PROMPT = (text: string) => `Analyze the following text using epistemic inference methodology:
 
@@ -73,7 +84,7 @@ Return your analysis as a valid JSON object with this exact structure:
   "coherenceScore": 0.75,
   "completeness": "Assessment of how complete the justifications are",
   "weaknesses": ["Weakness 1", "Weakness 2"],
-  "rewrittenText": "Version with all justifications fully developed"
+  "rewrittenText": "THE ACTUAL REWRITTEN TEXT GOES HERE"
 }
 
 Key principles:
@@ -81,7 +92,16 @@ Key principles:
 - Construct premises that would actually justify the claim (not strawmen)
 - Distinguish between empirical evidence, conceptual analysis, and definitional work
 - Coherence score reflects how well the reconstructed justifications hold together
-- Rewrite should feel natural while being epistemically rigorous`;
+
+CRITICAL FOR REWRITE:
+- The "rewrittenText" field MUST contain the ACTUAL REWRITTEN VERSION of the input text
+- DO NOT provide meta-commentary like "The text should include..." or "Consider adding..."
+- INSTEAD: Actually write the full text with all justifications inserted
+- Insert the missing premises and reasoning steps directly into the text
+- Keep the original claims but expand them with explicit justifications
+- The rewrite should read as a complete, self-contained argument
+- Use connecting phrases like "This is justified because...", "The evidence for this is...", "This follows from..."`;
+
 
 export const JUSTIFICATION_BUILDER_USER_PROMPT = (text: string) => `Identify underdeveloped claims and reconstruct their missing justifications:
 
