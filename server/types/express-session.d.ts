@@ -6,3 +6,11 @@ declare module "express-session" {
     username?: string;
   }
 }
+
+declare global {
+  namespace Express {
+    interface Request {
+      isInternal?: boolean;
+    }
+  }
+}

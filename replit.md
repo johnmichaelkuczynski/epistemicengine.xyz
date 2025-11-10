@@ -84,7 +84,19 @@ Preferred communication style: Simple, everyday language.
 
 ### Authentication & Session Management
 
-**No-Barrier Authentication Strategy**: Completely optional inline username input
+**Dual Authentication System**: Supports both API key (internal apps) and username login (human users)
+
+#### API Key Authentication (Internal Apps)
+- **Header-Based**: Check `x-zhi-key` header on every request
+- **Secret Validation**: Compare against `ZHI_PRIVATE_KEY` environment variable
+- **Full Access**: Valid API key grants immediate access without session/login
+- **Internal Flag**: Requests marked with `req.isInternal = true`
+- **User Identity**: Internal requests use dedicated "internal-api" user account
+- **Data Isolation**: Dedicated user ID ensures internal analyses are separate from human users
+- **Database Storage**: Analysis results saved with internal user's ID (auto-created on first API key use)
+- **History Access**: Internal requests can access their own analysis history via standard endpoints
+
+#### Username Login (Human Users)
 - **Zero Barriers**: Users access the main page immediately with full functionality (no login page, no dialog, no redirect)
 - **Optional Username**: Small inline username input in page header (w-40 width) - only needed for saving analyses to history
 - **Anonymous Usage**: All analysis features work without authentication - results saved with `userId: null`
@@ -102,13 +114,17 @@ Preferred communication style: Simple, everyday language.
 - **Session Data**: Stores `userId` and `username` for authenticated users
 
 **Route Access**:
-- No route protection - all pages accessible without authentication
+- No route protection - all pages accessible without authentication or API key
+- API key authentication takes precedence over session authentication
 - History page shows user-specific analyses when logged in, empty when not
-- Analysis functionality works for both authenticated and anonymous users
+- Analysis functionality works for authenticated users, internal apps, and anonymous users
 
 **API Endpoints**:
 - `POST /api/login` - Username-only login (finds or creates user)
-- `GET /api/me` - Returns current authenticated user from session (used to display username in header)
+- `GET /api/me` - Returns current authenticated user (session or internal API)
+  - Returns `{isInternal: true, username: "internal-api"}` for valid API key
+  - Returns `{isInternal: false, username: <username>}` for session-based user
+  - Returns `{success: false}` for anonymous access
 
 ### Data Storage Architecture
 

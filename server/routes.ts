@@ -49,6 +49,45 @@ export function registerRoutes(app: Express) {
     })
   );
   
+  // ==================== API KEY AUTHENTICATION ====================
+  // Middleware to check for internal API key (x-zhi-key header)
+  // If valid, grants full access without requiring login
+  // Internal requests use a dedicated "internal-api" user for data isolation
+  app.use(async (req, res, next) => {
+    try {
+      const apiKey = req.headers['x-zhi-key'] as string | undefined;
+      const zhiPrivateKey = process.env.ZHI_PRIVATE_KEY;
+      
+      if (apiKey && zhiPrivateKey && apiKey === zhiPrivateKey) {
+        req.isInternal = true;
+        
+        // Find or create dedicated internal user
+        let internalUser = await storage.getUserByUsername('internal-api');
+        if (!internalUser) {
+          internalUser = await storage.createUser({
+            username: 'internal-api',
+            passwordHash: null,
+          });
+          console.log(`[API Key Auth] Created internal-api user: ${internalUser.id}`);
+        }
+        
+        // Store internal user ID in session for this request
+        req.session.userId = internalUser.id;
+        req.session.username = internalUser.username;
+        
+        console.log(`[API Key Auth] Internal request authenticated via x-zhi-key header, userId: ${internalUser.id}`);
+      }
+      
+      next();
+    } catch (error) {
+      console.error('[API Key Auth] Failed to authenticate internal request:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Internal authentication failed',
+      });
+    }
+  });
+  
   // ==================== AUTH ROUTES ====================
   
   // Username-only login (no password required)
@@ -108,12 +147,26 @@ export function registerRoutes(app: Express) {
   
   // Get current user
   app.get("/api/me", (req: Request, res: Response) => {
+    // Internal API key access
+    if (req.isInternal) {
+      return res.json({
+        success: true,
+        user: {
+          id: "internal",
+          username: "internal-api",
+          isInternal: true,
+        },
+      });
+    }
+    
+    // Normal session-based user
     if (req.session.userId) {
       return res.json({
         success: true,
         user: {
           id: req.session.userId,
           username: req.session.username,
+          isInternal: false,
         },
       });
     }
@@ -201,7 +254,9 @@ export function registerRoutes(app: Express) {
 
       const processingTime = Date.now() - startTime;
 
-      // Save to database (associated with logged-in user)
+      // Save to database (associated with logged-in user or null for anonymous)
+      // Internal API requests save with dedicated "internal-api" user ID
+      // Anonymous requests save with userId: null
       try {
         await storage.saveAnalysis({
           userId: req.session.userId || null,
