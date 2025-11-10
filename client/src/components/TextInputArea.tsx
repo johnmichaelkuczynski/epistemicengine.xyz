@@ -30,13 +30,13 @@ export function TextInputArea({ value, onChange, wordCount, maxWords = 10000 }: 
     if (!file) return;
 
     const fileExtension = file.name.toLowerCase().split('.').pop();
-    const validExtensions = ['txt', 'md', 'pdf', 'doc', 'docx'];
+    const validExtensions = ['txt', 'md', 'pdf', 'docx'];
     
     if (!validExtensions.includes(fileExtension || '')) {
       toast({
         variant: "destructive",
         title: "Invalid file type",
-        description: "Please upload a .txt, .md, .pdf, .doc, or .docx file",
+        description: "Please upload a .txt, .md, .pdf, or .docx file",
       });
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
@@ -74,7 +74,7 @@ export function TextInputArea({ value, onChange, wordCount, maxWords = 10000 }: 
         }
         
         text = textParts.join('\n\n');
-      } else if (fileExtension === 'doc' || fileExtension === 'docx') {
+      } else if (fileExtension === 'docx') {
         const arrayBuffer = await file.arrayBuffer();
         const result = await mammoth.extractRawText({ arrayBuffer });
         text = result.value;
@@ -119,7 +119,7 @@ export function TextInputArea({ value, onChange, wordCount, maxWords = 10000 }: 
           <input
             ref={fileInputRef}
             type="file"
-            accept=".txt,.md,.pdf,.doc,.docx"
+            accept=".txt,.md,.pdf,.docx"
             onChange={handleFileUpload}
             className="hidden"
             data-testid="input-file-hidden"
