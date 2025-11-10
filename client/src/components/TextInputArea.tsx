@@ -4,6 +4,11 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Upload, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import mammoth from "mammoth";
+import * as pdfjsLib from "pdfjs-dist";
+
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.min.js`;
 
 interface TextInputAreaProps {
   value: string;
@@ -24,15 +29,14 @@ export function TextInputArea({ value, onChange, wordCount, maxWords = 10000 }: 
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const validTypes = ['text/plain', 'text/markdown'];
     const fileExtension = file.name.toLowerCase().split('.').pop();
-    const isValidExtension = ['txt', 'md'].includes(fileExtension || '');
+    const validExtensions = ['txt', 'md', 'pdf', 'doc', 'docx'];
     
-    if (!validTypes.includes(file.type) && !isValidExtension) {
+    if (!validExtensions.includes(fileExtension || '')) {
       toast({
         variant: "destructive",
         title: "Invalid file type",
-        description: "Please upload a .txt or .md file",
+        description: "Please upload a .txt, .md, .pdf, .doc, or .docx file",
       });
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
@@ -51,17 +55,53 @@ export function TextInputArea({ value, onChange, wordCount, maxWords = 10000 }: 
     setIsUploading(true);
     
     try {
-      const text = await file.text();
+      let text = '';
+      
+      if (fileExtension === 'txt' || fileExtension === 'md') {
+        text = await file.text();
+      } else if (fileExtension === 'pdf') {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const textParts: string[] = [];
+        
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          const pageText = content.items
+            .map((item: any) => item.str)
+            .join(' ');
+          textParts.push(pageText);
+        }
+        
+        text = textParts.join('\n\n');
+      } else if (fileExtension === 'doc' || fileExtension === 'docx') {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        text = result.value;
+      }
+      
+      if (!text.trim()) {
+        toast({
+          variant: "destructive",
+          title: "Empty file",
+          description: "The file appears to be empty or could not be read",
+        });
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        setIsUploading(false);
+        return;
+      }
+      
       onChange(text);
       toast({
         title: "File uploaded",
         description: `Loaded ${file.name} successfully`,
       });
     } catch (error) {
+      console.error('File upload error:', error);
       toast({
         variant: "destructive",
         title: "Upload failed",
-        description: "Could not read file content",
+        description: "Could not read file content. Please try a different file.",
       });
     } finally {
       setIsUploading(false);
@@ -79,7 +119,7 @@ export function TextInputArea({ value, onChange, wordCount, maxWords = 10000 }: 
           <input
             ref={fileInputRef}
             type="file"
-            accept=".txt,.md"
+            accept=".txt,.md,.pdf,.doc,.docx"
             onChange={handleFileUpload}
             className="hidden"
             data-testid="input-file-hidden"

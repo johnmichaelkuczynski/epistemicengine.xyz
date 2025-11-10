@@ -34,7 +34,9 @@ Preferred communication style: Simple, everyday language.
 **Key Frontend Components**:
 - `ModuleSelector` - Tab-based module switching interface (5-tab layout with Shield icon for Cognitive Integrity and GitBranch icon for Cognitive Continuity)
 - `TextInputArea` - Word-counted input with 10,000-word limit validation (automatic chunking for texts >2,000 words)
-  - **File Upload** - Users can upload .txt and .md files (max 5MB) via "Upload File" button next to input label
+  - **File Upload** - Users can upload .txt, .md, .pdf, .doc, and .docx files (max 5MB) via "Upload File" button next to input label
+    - PDF parsing via pdfjs-dist (extracts text from all pages)
+    - Word document parsing via mammoth (supports .doc and .docx)
 - Module-specific result components (`EpistemicInferenceResults`, `JustificationBuilderResults`, `KnowledgeUtilityResults`, `CognitiveIntegrityResults`, `CognitiveContinuityResults`)
 - `CoherenceScore` - Visual progress indicator for epistemic metrics
 - **TXT Export** - Each module includes a download button that exports complete analysis results as formatted plain text files
