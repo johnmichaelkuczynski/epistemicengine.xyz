@@ -2,16 +2,9 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
+import { processCognitiveIntegrity } from "./processing";
 
 const app = express();
-
-app.get("/api/zhianalyze", (req, res) => {
-  res.json({ ok: true, message: "Zhi Engine responding with JSON" });
-});
-
-app.post("/api/zhianalyze", (req, res) => {
-  res.json({ ok: true, message: "Zhi Engine responding with JSON" });
-});
 
 declare module 'http' {
   interface IncomingMessage {
@@ -24,6 +17,67 @@ app.use(express.json({
   }
 }));
 app.use(express.urlencoded({ extended: false }));
+
+// Intelligence Analysis Endpoint - GET for browser testing
+app.get("/api/zhianalyze", async (req, res) => {
+  try {
+    res.json({ 
+      ok: true, 
+      message: "Zhi Engine active. Use POST with { text: '...' } for analysis." 
+    });
+  } catch (error: any) {
+    res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+// Intelligence Analysis Endpoint - POST for actual analysis
+app.post("/api/zhianalyze", async (req, res) => {
+  try {
+    const { text } = req.body;
+    
+    if (!text || typeof text !== 'string') {
+      return res.status(400).json({ 
+        ok: false, 
+        error: "Missing or invalid 'text' field in request body" 
+      });
+    }
+
+    if (text.trim().length === 0) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: "Text field cannot be empty" 
+      });
+    }
+
+    // Run cognitive integrity analysis (intelligence meter)
+    const result = await processCognitiveIntegrity(text);
+    
+    res.json({
+      ok: true,
+      analysis: {
+        compositeScore: result.diagnostic_block.CompositeScore,
+        integrityType: result.diagnostic_block.IntegrityType,
+        metrics: {
+          realityAnchor: result.diagnostic_block.RealityAnchor,
+          causalDepth: result.diagnostic_block.CausalDepth,
+          friction: result.diagnostic_block.Friction,
+          compression: result.diagnostic_block.Compression,
+          simulationIndex: result.diagnostic_block.SimulationIndex,
+          levelCoherence: result.diagnostic_block.LevelCoherence,
+        },
+        commentary: result.authenticity_commentary,
+        reconstructedText: result.reconstructed_passage,
+        interpretation: result.interpretation_summary,
+      }
+    });
+  } catch (error: any) {
+    log(`Error in /api/zhianalyze: ${error.message}`);
+    res.status(500).json({ 
+      ok: false, 
+      error: "Analysis failed: " + error.message 
+    });
+  }
+});
 
 // Serve static files from public directory
 app.use(express.static('public'));
